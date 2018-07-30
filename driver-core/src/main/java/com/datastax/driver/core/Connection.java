@@ -70,6 +70,7 @@ class Connection {
 
     volatile long maxIdleTime;
 
+    private final Host host;
     final InetSocketAddress address;
     private final String name;
 
@@ -104,8 +105,9 @@ class Connection {
      * @param owner   the component owning this connection (may be null).
      *                Note that an existing connection can also be associated to an owner later with {@link #setOwner(Owner)}.
      */
-    protected Connection(String name, InetSocketAddress address, Factory factory, Owner owner) {
-        this.address = address;
+    protected Connection(String name, Host host, Factory factory, Owner owner) {
+        this.host = host;
+        this.address = host.getSocketAddress();
         this.factory = factory;
         this.dispatcher = new Dispatcher();
         this.name = name;
@@ -115,8 +117,8 @@ class Connection {
     /**
      * Create a new connection to a Cassandra node.
      */
-    Connection(String name, InetSocketAddress address, Factory factory) {
-        this(name, address, factory, null);
+    Connection(String name, Host host, Factory factory) {
+        this(name, host, factory, null);
     }
 
     ListenableFuture<Void> initAsync() {
@@ -733,7 +735,7 @@ class Connection {
                 throw new ConnectionException(address, "Connection factory is shut down");
 
             host.convictionPolicy.signalConnectionsOpening(1);
-            Connection connection = new Connection(buildConnectionName(host), address, this);
+            Connection connection = new Connection(buildConnectionName(host), host, this);
             // This method opens the connection synchronously, so wait until it's initialized
             try {
                 connection.initAsync().get();
@@ -748,7 +750,7 @@ class Connection {
          */
         Connection open(HostConnectionPool pool) throws ConnectionException, InterruptedException, UnsupportedProtocolVersionException, ClusterNameMismatchException {
             pool.host.convictionPolicy.signalConnectionsOpening(1);
-            Connection connection = new Connection(buildConnectionName(pool.host), pool.host.getSocketAddress(), this, pool);
+            Connection connection = new Connection(buildConnectionName(pool.host), pool.host, this, pool);
             try {
                 connection.initAsync().get();
                 return connection;
@@ -764,7 +766,7 @@ class Connection {
             pool.host.convictionPolicy.signalConnectionsOpening(count);
             List<Connection> connections = Lists.newArrayListWithCapacity(count);
             for (int i = 0; i < count; i++)
-                connections.add(new Connection(buildConnectionName(pool.host), pool.host.getSocketAddress(), this, pool));
+                connections.add(new Connection(buildConnectionName(pool.host), pool.host, this, pool));
             return connections;
         }
 
