@@ -16,6 +16,7 @@
 package com.datastax.driver.core;
 
 import com.datastax.driver.core.Responses.Result.SetKeyspace;
+import com.datastax.driver.core.Responses.Supported;
 import com.datastax.driver.core.exceptions.*;
 import com.datastax.driver.core.utils.MoreFutures;
 import com.google.common.annotations.VisibleForTesting;
@@ -185,8 +186,12 @@ class Connection {
         ListenableFuture<Void> initializeTransportFuture = Futures.transform(channelReadyFuture,
                 onChannelReady(protocolVersion, initExecutor), initExecutor);
 
+        ListenableFuture<Void> getShardingInfoFuture = protocolVersion.isShardingSupported()
+                ? GuavaCompatibility.INSTANCE.transformAsync(initializeTransportFuture, onTransportInitialized(initExecutor), initExecutor)
+                : initializeTransportFuture;
+
         // Fallback on initializeTransportFuture so we can properly propagate specific exceptions.
-        ListenableFuture<Void> initFuture = Futures.withFallback(initializeTransportFuture, new FutureFallback<Void>() {
+        ListenableFuture<Void> initFuture = Futures.withFallback(getShardingInfoFuture, new FutureFallback<Void>() {
             @Override
             public ListenableFuture<Void> create(Throwable t) throws Exception {
                 SettableFuture<Void> future = SettableFuture.create();
@@ -282,6 +287,37 @@ class Connection {
                         }
                     default:
                         throw new TransportException(address, String.format("Unexpected %s response message from server to a STARTUP message", response.type));
+                }
+            }
+        };
+    }
+
+    private AsyncFunction<Void, Void> onTransportInitialized(final Executor initExecutor) {
+        return new AsyncFunction<Void, Void>() {
+            @Override
+            public ListenableFuture<Void> apply(Void input) throws Exception {
+                Future shardingInfoResponseFuture = write(new Requests.Options());
+                return GuavaCompatibility.INSTANCE.transformAsync(shardingInfoResponseFuture,
+                        onShardingInfoResponse(initExecutor), initExecutor);
+            }
+        };
+    }
+
+    private AsyncFunction<Message.Response, Void> onShardingInfoResponse(final Executor initExecutor) {
+        return new AsyncFunction<Message.Response, Void>() {
+            @Override
+            public ListenableFuture<Void> apply(Message.Response response) throws Exception {
+                switch (response.type) {
+                    case SUPPORTED:
+                        Responses.Supported msg = (Supported) response;
+                        ShardingInfo.ConnectionShardingInfo sharding = ShardingInfo.parseShardingInfo(msg.supported);
+                        if (sharding != null) {
+                            host.setShardingInfo(sharding.shardingInfo);
+                            Connection.this.shardId = sharding.shardId;
+                        }
+                        return MoreFutures.VOID_SUCCESS;
+                    default:
+                        throw new TransportException(address, String.format("Unexpected %s response message from server to a OPTIONS message", response.type));
                 }
             }
         };
