@@ -57,6 +57,9 @@ public class Host {
 
     private volatile UUID schemaVersion;
 
+    // Can be set concurrently but the value should always be the same.
+    private volatile ShardingInfo shardingInfo = null;
+
     enum State {ADDED, DOWN, UP}
 
     volatile State state;
@@ -352,6 +355,14 @@ public class Host {
 
     void setTokens(Set<Token> tokens) {
         this.tokens = tokens;
+    }
+
+    public ShardingInfo getShardingInfo() {
+        return shardingInfo;
+    }
+
+    public void setShardingInfo(ShardingInfo shardingInfo) {
+        this.shardingInfo = shardingInfo;
     }
 
     /**
