@@ -187,7 +187,7 @@ class Connection {
                 onChannelReady(protocolVersion, initExecutor), initExecutor);
 
         ListenableFuture<Void> getShardingInfoFuture = protocolVersion.isShardingSupported()
-                ? GuavaCompatibility.INSTANCE.transformAsync(initializeTransportFuture, onTransportInitialized(initExecutor), initExecutor)
+                ? Futures.transform(initializeTransportFuture, onTransportInitialized(initExecutor), initExecutor)
                 : initializeTransportFuture;
 
         // Fallback on initializeTransportFuture so we can properly propagate specific exceptions.
@@ -297,7 +297,7 @@ class Connection {
             @Override
             public ListenableFuture<Void> apply(Void input) throws Exception {
                 Future shardingInfoResponseFuture = write(new Requests.Options());
-                return GuavaCompatibility.INSTANCE.transformAsync(shardingInfoResponseFuture,
+                return Futures.transform(shardingInfoResponseFuture,
                         onShardingInfoResponse(initExecutor), initExecutor);
             }
         };

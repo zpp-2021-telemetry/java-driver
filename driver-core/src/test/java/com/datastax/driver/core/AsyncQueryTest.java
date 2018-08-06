@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -69,8 +70,10 @@ public class AsyncQueryTest extends CCMTestsSupport {
         TimeUnit.MILLISECONDS.sleep(100);
 
         HostConnectionPool pool = getPool(session());
-        for (Connection connection : pool.connections) {
-            assertEquals(connection.inFlight.get(), 0);
+        for (List<Connection> shardConnections : pool.connections) {
+            for (Connection connection : shardConnections) {
+                assertEquals(connection.inFlight.get(), 0);
+            }
         }
     }
 
