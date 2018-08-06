@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -333,10 +334,14 @@ class RequestHandler {
             if (allowSpeculativeExecutions && nextExecutionScheduled.compareAndSet(false, true))
                 scheduleExecution(speculativeExecutionPlan.nextExecution(host));
 
+            ProtocolVersion protocolVersion = manager.cluster.manager.protocolVersion();
+            CodecRegistry codecRegistry = manager.cluster.manager.configuration.getCodecRegistry();
+            ByteBuffer routingKey = statement.getRoutingKey(protocolVersion, codecRegistry);
+
             PoolingOptions poolingOptions = manager.configuration().getPoolingOptions();
             ListenableFuture<Connection> connectionFuture = pool.borrowConnection(
                     poolingOptions.getPoolTimeoutMillis(), TimeUnit.MILLISECONDS,
-                    poolingOptions.getMaxQueueSize());
+                    poolingOptions.getMaxQueueSize(), routingKey);
             Futures.addCallback(connectionFuture, new FutureCallback<Connection>() {
                 @Override
                 public void onSuccess(Connection connection) {
