@@ -125,6 +125,7 @@ public class Cluster implements Closeable {
     }
 
     private Cluster(String name, List<InetSocketAddress> contactPoints, Configuration configuration, Collection<Host.StateListener> listeners) {
+        System.out.println("===== Using optimized driver!!! =====");
         this.manager = new Manager(name, contactPoints, configuration, listeners);
     }
 
