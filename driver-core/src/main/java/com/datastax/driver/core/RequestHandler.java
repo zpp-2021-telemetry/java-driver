@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -291,7 +292,10 @@ class RequestHandler {
 
             Connection connection = null;
             try {
-                connection = currentPool.borrowConnection(manager.configuration().getPoolingOptions().getPoolTimeoutMillis(), TimeUnit.MILLISECONDS);
+                ProtocolVersion protocolVersion = manager.cluster.manager.protocolVersion();
+                CodecRegistry codecRegistry = manager.cluster.manager.configuration.getCodecRegistry();
+                ByteBuffer routingKey = statement.getRoutingKey(protocolVersion, codecRegistry);
+                connection = currentPool.borrowConnection(manager.configuration().getPoolingOptions().getPoolTimeoutMillis(), TimeUnit.MILLISECONDS, routingKey);
                 if (current != null) {
                     if (triedHosts == null)
                         triedHosts = new CopyOnWriteArrayList<Host>();

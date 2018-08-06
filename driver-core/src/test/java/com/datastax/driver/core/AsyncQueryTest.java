@@ -23,6 +23,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,8 +62,10 @@ public class AsyncQueryTest extends CCMTestsSupport {
         TimeUnit.MILLISECONDS.sleep(100);
 
         HostConnectionPool pool = getPool(session());
-        for (Connection connection : pool.connections) {
-            assertEquals(connection.inFlight.get(), 0);
+        for (List<Connection> shardConnections : pool.connections) {
+            for (Connection connection : shardConnections) {
+                assertEquals(connection.inFlight.get(), 0);
+            }
         }
     }
 
