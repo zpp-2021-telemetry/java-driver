@@ -229,7 +229,7 @@
                 <inherited>true</inherited>
                 <configuration>
                     <verbose>false</verbose>
-                    <additionalparam>${javadoc.opts}</additionalparam>
+                    <additionalparam>${javadoc.opts} --allow-script-in-comments</additionalparam>
                     <!-- I can haz math in my javadoc (see http://zverovich.net/2012/01/14/beautiful-math-in-javadoc.html) -->
                     <header>
                         &lt;script type="text/javascript"
