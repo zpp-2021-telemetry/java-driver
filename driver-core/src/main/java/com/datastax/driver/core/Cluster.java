@@ -158,6 +158,7 @@ public class Cluster implements Closeable {
      *                                  Cluster.
      */
     public Cluster init() {
+        register(new PagingOptimizingLatencyTracker());
         this.manager.init();
         return this;
     }
