@@ -338,7 +338,7 @@ class Connection {
             return MoreFutures.VOID_SUCCESS;
         }
 
-        DefaultResultSetFuture clusterNameFuture = new DefaultResultSetFuture(null, protocolVersion, new Requests.Query("select cluster_name from system.local"));
+        DefaultResultSetFuture clusterNameFuture = new DefaultResultSetFuture(null, protocolVersion, new Requests.Query("select cluster_name from system.local WHERE key='local'"));
         try {
             write(clusterNameFuture);
             return GuavaCompatibility.INSTANCE.transformAsync(clusterNameFuture,
