@@ -75,6 +75,7 @@ public abstract class Statement {
   private volatile Map<String, ByteBuffer> outgoingPayload;
   private volatile Host host;
   private volatile int nowInSeconds = Integer.MIN_VALUE;
+  private volatile Host lastHost;
 
   // We don't want to expose the constructor, because the code relies on this being only sub-classed
   // by RegularStatement, BoundStatement and BatchStatement
@@ -665,5 +666,13 @@ public abstract class Statement {
   public Statement setNowInSeconds(int nowInSeconds) {
     this.nowInSeconds = nowInSeconds;
     return this;
+  }
+
+  public Host getLastHost() {
+    return lastHost;
+  }
+
+  public void setLastHost(Host host) {
+    lastHost = host;
   }
 }
