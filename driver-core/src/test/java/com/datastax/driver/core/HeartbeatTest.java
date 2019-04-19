@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2019 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import static com.datastax.driver.core.Assertions.assertThat;
@@ -179,7 +185,7 @@ public class HeartbeatTest extends ScassandraTestBase {
       // Find the connection in the connection pool.
       SessionManager session = (SessionManager) cluster.connect();
       Host host = TestUtils.findHost(cluster, 1);
-      Connection connection = session.pools.get(host).connections.get(0);
+      Connection connection = session.pools.get(host).connections[0].get(0);
 
       // Extract connection name from toString implementation.
       String connectionName =

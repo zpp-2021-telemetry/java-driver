@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2019 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import com.datastax.driver.core.Message.Response;
@@ -719,7 +725,9 @@ class SessionManager extends AbstractSession {
         // execute
         // the prepared query. So don't wait if no connection is available, simply abort.
         ListenableFuture<Connection> connectionFuture =
-            entry.getValue().borrowConnection(0, TimeUnit.MILLISECONDS, 0);
+            entry
+                .getValue()
+                .borrowConnection(0, TimeUnit.MILLISECONDS, 0, statement.getRoutingKey());
         ListenableFuture<Response> prepareFuture =
             GuavaCompatibility.INSTANCE.transformAsync(
                 connectionFuture,

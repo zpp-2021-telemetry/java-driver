@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2019 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,6 +36,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -74,8 +81,10 @@ public class AsyncQueryTest extends CCMTestsSupport {
     TimeUnit.MILLISECONDS.sleep(100);
 
     HostConnectionPool pool = getPool(session());
-    for (Connection connection : pool.connections) {
-      assertEquals(connection.inFlight.get(), 0);
+    for (List<Connection> shardConnections : pool.connections) {
+      for (Connection connection : shardConnections) {
+        assertEquals(connection.inFlight.get(), 0);
+      }
     }
   }
 
