@@ -197,6 +197,10 @@ class Connection {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
               writer.decrementAndGet();
+              if (future.cause() != null) {
+                logger.warn(
+                    "Error creating netty channel to " + endPoint.resolve(), future.cause());
+              }
               channel = future.channel();
               if (isClosed()) {
                 channel
