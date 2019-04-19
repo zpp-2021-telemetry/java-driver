@@ -108,6 +108,7 @@ class Connection {
 
   volatile long maxIdleTime;
 
+  private final Host host;
   final EndPoint endPoint;
   private final String name;
 
@@ -137,13 +138,14 @@ class Connection {
    * Create a new connection to a Cassandra node and associate it with the given pool.
    *
    * @param name the connection name
-   * @param endPoint the information to connect to the node
+   * @param host the information to connect to the node
    * @param factory the connection factory to use
    * @param owner the component owning this connection (may be null). Note that an existing
    *     connection can also be associated to an owner later with {@link #setOwner(Owner)}.
    */
-  protected Connection(String name, EndPoint endPoint, Factory factory, Owner owner) {
-    this.endPoint = endPoint;
+  protected Connection(String name, Host host, Factory factory, Owner owner) {
+    this.host = host;
+    this.endPoint = host.getEndPoint();
     this.factory = factory;
     this.dispatcher = new Dispatcher();
     this.name = name;
@@ -154,8 +156,8 @@ class Connection {
   }
 
   /** Create a new connection to a Cassandra node. */
-  Connection(String name, EndPoint endPoint, Factory factory) {
-    this(name, endPoint, factory, null);
+  Connection(String name, Host host, Factory factory) {
+    this(name, host, factory, null);
   }
 
   ListenableFuture<Void> initAsync() {
@@ -1019,7 +1021,7 @@ class Connection {
       if (isShutdown) throw new ConnectionException(endPoint, "Connection factory is shut down");
 
       host.convictionPolicy.signalConnectionsOpening(1);
-      Connection connection = new Connection(buildConnectionName(host), endPoint, this);
+      Connection connection = new Connection(buildConnectionName(host), host, this);
       // This method opens the connection synchronously, so wait until it's initialized
       try {
         connection.initAsync().get();
@@ -1034,8 +1036,7 @@ class Connection {
         throws ConnectionException, InterruptedException, UnsupportedProtocolVersionException,
             ClusterNameMismatchException {
       pool.host.convictionPolicy.signalConnectionsOpening(1);
-      Connection connection =
-          new Connection(buildConnectionName(pool.host), pool.host.getEndPoint(), this, pool);
+      Connection connection = new Connection(buildConnectionName(pool.host), pool.host, this, pool);
       try {
         connection.initAsync().get();
         return connection;
@@ -1052,8 +1053,7 @@ class Connection {
       pool.host.convictionPolicy.signalConnectionsOpening(count);
       List<Connection> connections = Lists.newArrayListWithCapacity(count);
       for (int i = 0; i < count; i++)
-        connections.add(
-            new Connection(buildConnectionName(pool.host), pool.host.getEndPoint(), this, pool));
+        connections.add(new Connection(buildConnectionName(pool.host), pool.host, this, pool));
       return connections;
     }
 
