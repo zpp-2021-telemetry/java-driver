@@ -119,6 +119,7 @@ class Connection {
   private final Host host;
   final InetSocketAddress address;
   private final String name;
+  private volatile Integer shardId = null;
 
   @VisibleForTesting volatile Channel channel;
   private final Factory factory;
@@ -809,6 +810,10 @@ class Connection {
   /** @return whether the connection was already associated with an owner */
   boolean setOwner(Owner owner) {
     return ownerRef.compareAndSet(null, owner);
+  }
+
+  public int shardId() {
+    return shardId == null ? 0 : shardId;
   }
 
   /**
