@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2019 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import com.datastax.driver.core.exceptions.DriverInternalError;
@@ -61,6 +67,10 @@ public enum ProtocolVersion {
    */
   public int toInt() {
     return asInt;
+  }
+
+  public boolean isShardingSupported() {
+    return this != V1 && this != V2 && this != V3;
   }
 
   /**
