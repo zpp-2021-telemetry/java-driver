@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2019 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import com.datastax.driver.core.policies.AddressTranslator;
@@ -54,6 +60,9 @@ public class Host {
   private volatile UUID hostId;
 
   private volatile UUID schemaVersion;
+
+  // Can be set concurrently but the value should always be the same.
+  private volatile ShardingInfo shardingInfo = null;
 
   enum State {
     ADDED,
@@ -394,6 +403,14 @@ public class Host {
 
   void setTokens(Set<Token> tokens) {
     this.tokens = tokens;
+  }
+
+  public ShardingInfo getShardingInfo() {
+    return shardingInfo;
+  }
+
+  public void setShardingInfo(ShardingInfo shardingInfo) {
+    this.shardingInfo = shardingInfo;
   }
 
   /**
