@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2019 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import static com.datastax.driver.core.SchemaElement.KEYSPACE;
@@ -175,6 +181,7 @@ public class Cluster implements Closeable {
       List<InetSocketAddress> contactPoints,
       Configuration configuration,
       Collection<Host.StateListener> listeners) {
+    System.out.println("===== Using optimized driver!!! =====");
     this.manager = new Manager(name, contactPoints, configuration, listeners);
   }
 
