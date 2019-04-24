@@ -54,4 +54,9 @@ public enum DseProtocolVersion implements ProtocolVersion {
   public boolean isBeta() {
     return beta;
   }
+
+  @Override
+  public boolean supportsShardingInfo() {
+    return false;
+  }
 }
