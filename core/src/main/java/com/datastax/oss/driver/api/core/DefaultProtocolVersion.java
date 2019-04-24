@@ -60,4 +60,9 @@ public enum DefaultProtocolVersion implements ProtocolVersion {
   public boolean isBeta() {
     return beta;
   }
+
+  @Override
+  public boolean supportsShardingInfo() {
+    return code != ProtocolConstants.Version.V3;
+  }
 }
