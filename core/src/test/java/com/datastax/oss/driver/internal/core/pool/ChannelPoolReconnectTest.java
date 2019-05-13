@@ -67,7 +67,7 @@ public class ChannelPoolReconnectTest extends ChannelPoolTestBase {
 
     assertThatStage(poolFuture).isSuccess();
     ChannelPool pool = poolFuture.toCompletableFuture().get();
-    assertThat(pool.channels).containsOnly(channel1, channel2);
+    assertThat(pool.channels[0]).containsOnly(channel1, channel2);
     inOrder.verify(eventBus, VERIFY_TIMEOUT.times(2)).fire(ChannelEvent.channelOpened(node));
 
     // Simulate fatal error on channel2
@@ -83,7 +83,7 @@ public class ChannelPoolReconnectTest extends ChannelPoolTestBase {
     inOrder.verify(eventBus, VERIFY_TIMEOUT).fire(ChannelEvent.channelOpened(node));
     verify(eventBus, VERIFY_TIMEOUT).fire(ChannelEvent.reconnectionStopped(node));
 
-    await().untilAsserted(() -> assertThat(pool.channels).containsOnly(channel1, channel3));
+    await().untilAsserted(() -> assertThat(pool.channels[0]).containsOnly(channel1, channel3));
 
     factoryHelper.verifyNoMoreCalls();
   }
@@ -115,7 +115,7 @@ public class ChannelPoolReconnectTest extends ChannelPoolTestBase {
 
     assertThatStage(poolFuture).isSuccess();
     ChannelPool pool = poolFuture.toCompletableFuture().get();
-    assertThat(pool.channels).containsOnly(channel1, channel2);
+    assertThat(pool.channels[0]).containsOnly(channel1, channel2);
     inOrder.verify(eventBus, VERIFY_TIMEOUT.times(2)).fire(ChannelEvent.channelOpened(node));
 
     // Simulate graceful shutdown on channel2
@@ -130,7 +130,7 @@ public class ChannelPoolReconnectTest extends ChannelPoolTestBase {
     inOrder.verify(eventBus, VERIFY_TIMEOUT).fire(ChannelEvent.channelOpened(node));
     verify(eventBus, VERIFY_TIMEOUT).fire(ChannelEvent.reconnectionStopped(node));
 
-    await().untilAsserted(() -> assertThat(pool.channels).containsOnly(channel1, channel3));
+    await().untilAsserted(() -> assertThat(pool.channels[0]).containsOnly(channel1, channel3));
 
     factoryHelper.verifyNoMoreCalls();
   }
@@ -182,7 +182,7 @@ public class ChannelPoolReconnectTest extends ChannelPoolTestBase {
     inOrder.verify(eventBus, VERIFY_TIMEOUT).fire(ChannelEvent.channelOpened(node));
     verify(eventBus, VERIFY_TIMEOUT).fire(ChannelEvent.reconnectionStopped(node));
 
-    await().untilAsserted(() -> assertThat(pool.channels).containsOnly(channel2));
+    await().untilAsserted(() -> assertThat(pool.channels[0]).containsOnly(channel2));
 
     factoryHelper.verifyNoMoreCalls();
   }
