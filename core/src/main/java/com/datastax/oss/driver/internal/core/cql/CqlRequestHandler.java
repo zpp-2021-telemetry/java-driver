@@ -27,6 +27,8 @@ import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 import com.datastax.oss.driver.api.core.cql.ExecutionInfo;
 import com.datastax.oss.driver.api.core.cql.Statement;
 import com.datastax.oss.driver.api.core.metadata.Node;
+import com.datastax.oss.driver.api.core.metadata.TokenMap;
+import com.datastax.oss.driver.api.core.metadata.token.Token;
 import com.datastax.oss.driver.api.core.metrics.DefaultNodeMetric;
 import com.datastax.oss.driver.api.core.metrics.DefaultSessionMetric;
 import com.datastax.oss.driver.api.core.retry.RetryDecision;
@@ -49,6 +51,7 @@ import com.datastax.oss.driver.internal.core.channel.DriverChannel;
 import com.datastax.oss.driver.internal.core.channel.ResponseCallback;
 import com.datastax.oss.driver.internal.core.context.InternalDriverContext;
 import com.datastax.oss.driver.internal.core.metadata.DefaultNode;
+import com.datastax.oss.driver.internal.core.metadata.token.DefaultTokenMap;
 import com.datastax.oss.driver.internal.core.metrics.NodeMetricUpdater;
 import com.datastax.oss.driver.internal.core.metrics.SessionMetricUpdater;
 import com.datastax.oss.driver.internal.core.session.DefaultSession;
@@ -239,6 +242,19 @@ public class CqlRequestHandler implements Throttled {
     return null;
   }
 
+  private Token getRoutingToken() {
+    Token token = statement.getRoutingToken();
+    if (token != null) {
+      return token;
+    }
+    ByteBuffer key = statement.getRoutingKey();
+    if (key == null) {
+      return null;
+    }
+    TokenMap tokenMap = context.getMetadataManager().getMetadata().getTokenMap().orElse(null);
+    return tokenMap == null ? null : ((DefaultTokenMap) tokenMap).getTokenFactory().hash(key);
+  }
+
   /**
    * Sends the request to the next available node.
    *
@@ -261,9 +277,10 @@ public class CqlRequestHandler implements Throttled {
     }
     Node node = retriedNode;
     DriverChannel channel = null;
-    if (node == null || (channel = session.getChannel(node, logPrefix)) == null) {
+    if (node == null
+        || (channel = session.getChannel(node, logPrefix, getRoutingToken())) == null) {
       while (!result.isDone() && (node = queryPlan.poll()) != null) {
-        channel = session.getChannel(node, logPrefix);
+        channel = session.getChannel(node, logPrefix, getRoutingToken());
         if (channel != null) {
           break;
         }
