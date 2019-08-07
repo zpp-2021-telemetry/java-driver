@@ -10,9 +10,9 @@ package name:
 
 ```xml
 <dependency>
-  <groupId>com.datastax.cassandra</groupId>
-  <artifactId>cassandra-driver-core</artifactId>
-  <version>3.9.0</version>
+  <groupId>com.scylladb</groupId>
+  <artifactId>scylla-driver-core</artifactId>
+  <version>3.9.0-scylla-0-SNAPSHOT</version>
   <classifier>shaded</classifier>
   <!-- Because the shaded JAR uses the original POM, you still need
        to exclude this dependency explicitly: -->
@@ -30,9 +30,9 @@ non-shaded JAR:
 
 ```xml
 <dependency>
-  <groupId>com.datastax.cassandra</groupId>
-  <artifactId>cassandra-driver-core</artifactId>
-  <version>3.9.0</version>
+  <groupId>com.scylladb</groupId>
+  <artifactId>scylla-driver-core</artifactId>
+  <version>3.9.0-scylla-0-SNAPSHOT</version>
   <classifier>shaded</classifier>
   <exclusions>
     <exclusion>
@@ -42,13 +42,13 @@ non-shaded JAR:
   </exclusions>
 </dependency>
 <dependency>
-  <groupId>com.datastax.cassandra</groupId>
-  <artifactId>cassandra-driver-mapping</artifactId>
-  <version>3.9.0</version>
+  <groupId>com.scylladb</groupId>
+  <artifactId>scylla-driver-mapping</artifactId>
+  <version>3.9.0-scylla-0-SNAPSHOT</version>
   <exclusions>
     <exclusion>
-      <groupId>com.datastax.cassandra</groupId>
-      <artifactId>cassandra-driver-core</artifactId>
+      <groupId>com.scylladb</groupId>
+      <artifactId>scylla-driver-core</artifactId>
     </exclusion>
   </exclusions>
 </dependency>
