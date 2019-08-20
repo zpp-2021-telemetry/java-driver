@@ -442,6 +442,9 @@ class Connection {
             if (sharding != null) {
               host.setShardingInfo(sharding.shardingInfo);
               Connection.this.shardId = sharding.shardId;
+            } else {
+              host.setShardingInfo(null);
+              Connection.this.shardId = 0;
             }
             return MoreFutures.VOID_SUCCESS;
           default:
@@ -902,7 +905,7 @@ class Connection {
   }
 
   public int shardId() {
-    return shardId == null ? 0 : shardId;
+    return shardId == null || host.getShardingInfo() == null ? 0 : shardId;
   }
 
   /**
