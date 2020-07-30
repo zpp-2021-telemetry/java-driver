@@ -314,13 +314,7 @@ public class ChannelFactory {
           HeartbeatHandler heartbeatHandler = new HeartbeatHandler(defaultConfig);
           ProtocolInitHandler initHandler =
               new ProtocolInitHandler(
-                  context,
-                  protocolVersion,
-                  clusterName,
-                  endPoint,
-                  options,
-                  heartbeatHandler,
-                  productType == null);
+                  context, protocolVersion, clusterName, endPoint, options, heartbeatHandler, true);
 
           ChannelPipeline pipeline = channel.pipeline();
           context
