@@ -27,7 +27,7 @@
     <moduleSet>
       <useAllReactorProjects>true</useAllReactorProjects>
       <includes>
-        <include>com.datastax.oss:java-driver-core</include>
+        <include>com.scylladb:java-driver-core</include>
       </includes>
       <binaries>
         <outputDirectory>lib/core</outputDirectory>
@@ -40,9 +40,9 @@
                 For some reason, we need to exclude all other modules here, even though our
                 moduleSet targets core only
               -->
-              <exclude>com.datastax.oss:java-driver-query-builder</exclude>
-              <exclude>com.datastax.oss:java-driver-mapper-runtime</exclude>
-              <exclude>com.datastax.oss:java-driver-mapper-processor</exclude>
+              <exclude>com.scylladb:java-driver-query-builder</exclude>
+              <exclude>com.scylladb:java-driver-mapper-runtime</exclude>
+              <exclude>com.scylladb:java-driver-mapper-processor</exclude>
             </excludes>
             <useTransitiveFiltering>true</useTransitiveFiltering>
           </dependencySet>
@@ -53,7 +53,7 @@
     <moduleSet>
       <useAllReactorProjects>true</useAllReactorProjects>
       <includes>
-        <include>com.datastax.oss:java-driver-query-builder</include>
+        <include>com.scylladb:java-driver-query-builder</include>
       </includes>
       <binaries>
         <outputDirectory>lib/query-builder</outputDirectory>
@@ -61,9 +61,9 @@
         <dependencySets>
           <dependencySet>
             <excludes>
-              <exclude>com.datastax.oss:java-driver-core</exclude>
-              <exclude>com.datastax.oss:java-driver-mapper-runtime</exclude>
-              <exclude>com.datastax.oss:java-driver-mapper-processor</exclude>
+              <exclude>com.scylladb:java-driver-core</exclude>
+              <exclude>com.scylladb:java-driver-mapper-runtime</exclude>
+              <exclude>com.scylladb:java-driver-mapper-processor</exclude>
               <!-- Don't reinclude dependencies that core also has -->
               <exclude>com.datastax.oss:java-driver-shaded-guava</exclude>
               <exclude>com.github.stephenc.jcip:jcip-annotations</exclude>
@@ -78,7 +78,7 @@
     <moduleSet>
       <useAllReactorProjects>true</useAllReactorProjects>
       <includes>
-        <include>com.datastax.oss:java-driver-mapper-runtime</include>
+        <include>com.scylladb:java-driver-mapper-runtime</include>
       </includes>
       <binaries>
         <outputDirectory>lib/mapper-runtime</outputDirectory>
@@ -86,9 +86,9 @@
         <dependencySets>
           <dependencySet>
             <excludes>
-              <exclude>com.datastax.oss:java-driver-core</exclude>
-              <exclude>com.datastax.oss:java-driver-query-builder</exclude>
-              <exclude>com.datastax.oss:java-driver-mapper-processor</exclude>
+              <exclude>com.scylladb:java-driver-core</exclude>
+              <exclude>com.scylladb:java-driver-query-builder</exclude>
+              <exclude>com.scylladb:java-driver-mapper-processor</exclude>
               <!-- Don't reinclude dependencies that core also has -->
               <exclude>com.datastax.oss:java-driver-shaded-guava</exclude>
               <exclude>com.github.stephenc.jcip:jcip-annotations</exclude>
@@ -103,7 +103,7 @@
     <moduleSet>
       <useAllReactorProjects>true</useAllReactorProjects>
       <includes>
-        <include>com.datastax.oss:java-driver-mapper-processor</include>
+        <include>com.scylladb:java-driver-mapper-processor</include>
       </includes>
       <binaries>
         <outputDirectory>lib/mapper-processor</outputDirectory>
@@ -111,9 +111,9 @@
         <dependencySets>
           <dependencySet>
             <excludes>
-              <exclude>com.datastax.oss:java-driver-core</exclude>
-              <exclude>com.datastax.oss:java-driver-query-builder</exclude>
-              <exclude>com.datastax.oss:java-driver-mapper-runtime</exclude>
+              <exclude>com.scylladb:java-driver-core</exclude>
+              <exclude>com.scylladb:java-driver-query-builder</exclude>
+              <exclude>com.scylladb:java-driver-mapper-runtime</exclude>
               <!-- Don't reinclude dependencies that core also has -->
               <exclude>com.datastax.oss:java-driver-shaded-guava</exclude>
               <exclude>com.github.stephenc.jcip:jcip-annotations</exclude>
@@ -128,10 +128,10 @@
     <moduleSet>
       <useAllReactorProjects>true</useAllReactorProjects>
       <includes>
-        <include>com.datastax.oss:java-driver-core</include>
-        <include>com.datastax.oss:java-driver-query-builder</include>
-        <include>com.datastax.oss:java-driver-mapper-runtime</include>
-        <include>com.datastax.oss:java-driver-mapper-processor</include>
+        <include>com.scylladb:java-driver-core</include>
+        <include>com.scylladb:java-driver-query-builder</include>
+        <include>com.scylladb:java-driver-mapper-runtime</include>
+        <include>com.scylladb:java-driver-mapper-processor</include>
       </includes>
       <binaries>
         <unpack>false</unpack>

@@ -11,9 +11,15 @@ To import the driver's BOM, add the following section in your application's own 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>com.datastax.oss</groupId>
+        <groupId>com.scylladb</groupId>
         <artifactId>java-driver-bom</artifactId>
+<<<<<<< HEAD
         <version>4.9.0</version>
+||||||| parent of 4c6317602... Prepare for publishing to Maven repo
+        <version>4.8.0</version>
+=======
+        <version>4.8.0-scylla-0-SNAPSHOT</version>
+>>>>>>> 4c6317602... Prepare for publishing to Maven repo
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -28,7 +34,7 @@ This allows you to omit the version when you later reference the driver artifact
   ...
   <dependencies>
     <dependency>
-      <groupId>com.datastax.oss</groupId>
+      <groupId>com.scylladb</groupId>
       <artifactId>java-driver-query-builder</artifactId>
     </dependency>
   </dependencies>
@@ -52,7 +58,7 @@ scope:
 ```xml
   <dependencies>
     <dependency>
-      <groupId>com.datastax.oss</groupId>
+      <groupId>com.scylladb</groupId>
       <artifactId>java-driver-mapper-processor</artifactId>
       <scope>provided</scope>
     </dependency>
@@ -65,12 +71,18 @@ good idea to extract a property to keep it in sync with the BOM:
 ```xml
 <project>
   <properties>
+<<<<<<< HEAD
     <java-driver.version>4.9.0</java-driver.version>
+||||||| parent of 4c6317602... Prepare for publishing to Maven repo
+    <java-driver.version>4.8.0</java-driver.version>
+=======
+    <java-driver.version>4.8.0-scylla-0-SNAPSHOT</java-driver.version>
+>>>>>>> 4c6317602... Prepare for publishing to Maven repo
   </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>com.datastax.oss</groupId>
+        <groupId>com.scylladb</groupId>
         <artifactId>java-driver-bom</artifactId>
         <version>${java-driver.version}</version>
         <type>pom</type>
@@ -81,7 +93,7 @@ good idea to extract a property to keep it in sync with the BOM:
   <dependencies>
     <!-- Regular dependency, no need to repeat the version: -->
     <dependency>
-      <groupId>com.datastax.oss</groupId>
+      <groupId>com.scylladb</groupId>
       <artifactId>java-driver-mapper-runtime</artifactId>
     </dependency>
   </dependencies>
@@ -93,7 +105,7 @@ good idea to extract a property to keep it in sync with the BOM:
           <annotationProcessorPaths>
             <!-- Annotation processor, can't use the BOM => explicit version -->
             <path>
-              <groupId>com.datastax.oss</groupId>
+              <groupId>com.scylladb</groupId>
               <artifactId>java-driver-mapper-processor</artifactId>
               <version>${java-driver.version}</version>
             </path>
