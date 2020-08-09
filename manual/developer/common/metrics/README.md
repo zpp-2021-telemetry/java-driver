@@ -12,7 +12,7 @@ Micrometer:
 
 ```xml
 <dependency>
-  <groupId>com.datastax.oss</groupId>
+  <groupId>com.scylladb</groupId>
   <artifactId>java-driver-metrics-micrometer</artifactId>
   <version>${driver.version}</version>
 </dependency>
@@ -22,7 +22,7 @@ or the following for MicroProfile:
 
 ```xml
 <dependency>
-  <groupId>com.datastax.oss</groupId>
+  <groupId>com.scylladb</groupId>
   <artifactId>java-driver-metrics-microprofile</artifactId>
   <version>${driver.version}</version>
 </dependency>
