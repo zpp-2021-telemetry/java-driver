@@ -86,6 +86,10 @@ public abstract class Statement {
   // by RegularStatement, BoundStatement and BatchStatement
   Statement() {}
 
+  public boolean isLWT() {
+    return false;
+  }
+
   /**
    * Sets the consistency level for the query.
    *
