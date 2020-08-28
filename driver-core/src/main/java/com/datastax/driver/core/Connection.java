@@ -447,6 +447,10 @@ class Connection {
               host.setShardingInfo(null);
               Connection.this.shardId = 0;
             }
+            LwtInfo lwt = LwtInfo.parseLwtInfo(msg.supported);
+            if (lwt != null) {
+              host.setLwtInfo(lwt);
+            }
             return MoreFutures.VOID_SUCCESS;
           default:
             throw new TransportException(
@@ -1556,9 +1560,14 @@ class Connection {
 
     private final Message.Request request;
     private volatile EndPoint endPoint;
+    private volatile LwtInfo lwtInfo;
 
     Future(Message.Request request) {
       this.request = request;
+    }
+
+    public LwtInfo getLwtInfo() {
+      return lwtInfo;
     }
 
     @Override
@@ -1591,6 +1600,10 @@ class Connection {
     public void onSet(
         Connection connection, Message.Response response, long latency, int retryCount) {
       this.endPoint = connection.endPoint;
+      LwtInfo lwtInfo = connection.host.getLwtInfo();
+      if (lwtInfo != null) {
+        this.lwtInfo = lwtInfo;
+      }
       super.set(response);
     }
 
