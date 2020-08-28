@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2020 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import static com.datastax.driver.core.ProtocolVersion.V4;
@@ -31,6 +37,7 @@ public class DefaultPreparedStatement implements PreparedStatement {
   final String queryKeyspace;
   final Map<String, ByteBuffer> incomingPayload;
   final Cluster cluster;
+  final boolean isLWT;
 
   volatile ByteBuffer routingKey;
 
@@ -46,12 +53,14 @@ public class DefaultPreparedStatement implements PreparedStatement {
       String query,
       String queryKeyspace,
       Map<String, ByteBuffer> incomingPayload,
-      Cluster cluster) {
+      Cluster cluster,
+      boolean isLWT) {
     this.preparedId = id;
     this.query = query;
     this.queryKeyspace = queryKeyspace;
     this.incomingPayload = incomingPayload;
     this.cluster = cluster;
+    this.isLWT = isLWT;
   }
 
   static DefaultPreparedStatement fromMessage(
@@ -78,7 +87,7 @@ public class DefaultPreparedStatement implements PreparedStatement {
     PreparedId preparedId =
         new PreparedId(boundValuesMetadata, resultSetMetadata, pkIndices, protocolVersion);
     return new DefaultPreparedStatement(
-        preparedId, query, queryKeyspace, msg.getCustomPayload(), cluster);
+        preparedId, query, queryKeyspace, msg.getCustomPayload(), cluster, false);
   }
 
   private static int[] computePkIndices(Metadata clusterMetadata, ColumnDefinitions boundColumns) {
@@ -254,5 +263,11 @@ public class DefaultPreparedStatement implements PreparedStatement {
   @Override
   public Boolean isIdempotent() {
     return this.idempotent;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean isLWT() {
+    return isLWT;
   }
 }

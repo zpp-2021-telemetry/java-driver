@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2020 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import com.datastax.driver.core.exceptions.InvalidTypeException;
@@ -344,4 +350,7 @@ public interface PreparedStatement {
    *     QueryOptions#getDefaultIdempotence()}.
    */
   public Boolean isIdempotent();
+
+  /** Whether a prepared statement is LWT statement */
+  public boolean isLWT();
 }
