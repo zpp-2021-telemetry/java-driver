@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2020 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import static com.datastax.driver.core.SchemaElement.AGGREGATE;
@@ -409,7 +415,7 @@ class Responses {
           }
         }
 
-        static final Metadata EMPTY = new Metadata(null, 0, null, null, null);
+        static final Metadata EMPTY = new Metadata(null, 0, null, null, null, 0);
 
         final int columnCount;
         final ColumnDefinitions columns; // Can be null if no metadata was asked by the query
@@ -417,18 +423,21 @@ class Responses {
         final int[] pkIndices;
         final MD5Digest
             metadataId; // only present if the flag METADATA_CHANGED is set (ROWS response only)
+        final int flags;
 
         private Metadata(
             MD5Digest metadataId,
             int columnCount,
             ColumnDefinitions columns,
             ByteBuffer pagingState,
-            int[] pkIndices) {
+            int[] pkIndices,
+            int flags) {
           this.metadataId = metadataId;
           this.columnCount = columnCount;
           this.columns = columns;
           this.pagingState = pagingState;
           this.pkIndices = pkIndices;
+          this.flags = flags;
         }
 
         static Metadata decode(
@@ -443,7 +452,8 @@ class Responses {
             CodecRegistry codecRegistry) {
 
           // flags & column count
-          EnumSet<Flag> flags = Flag.deserialize(body.readInt());
+          int flagsInt = body.readInt();
+          EnumSet<Flag> flags = Flag.deserialize(flagsInt);
           int columnCount = body.readInt();
 
           ByteBuffer state = null;
@@ -466,7 +476,7 @@ class Responses {
           }
 
           if (flags.contains(Flag.NO_METADATA))
-            return new Metadata(resultMetadataId, columnCount, null, state, pkIndices);
+            return new Metadata(resultMetadataId, columnCount, null, state, pkIndices, flagsInt);
 
           boolean globalTablesSpec = flags.contains(Flag.GLOBAL_TABLES_SPEC);
 
@@ -492,7 +502,8 @@ class Responses {
               columnCount,
               new ColumnDefinitions(defs, codecRegistry),
               state,
-              pkIndices);
+              pkIndices,
+              flagsInt);
         }
 
         @Override
