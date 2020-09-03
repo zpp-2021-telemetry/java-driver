@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2020 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import com.google.common.base.Preconditions;
@@ -55,11 +61,19 @@ class Requests {
     private final boolean noCompact;
 
     Startup(ProtocolOptions.Compression compression, boolean noCompact) {
+      this(compression, noCompact, Collections.<String, String>emptyMap());
+    }
+
+    Startup(
+        ProtocolOptions.Compression compression,
+        boolean noCompact,
+        Map<String, String> additionalOptions) {
       super(Message.Request.Type.STARTUP);
       this.compression = compression;
       this.noCompact = noCompact;
 
       ImmutableMap.Builder<String, String> map = new ImmutableMap.Builder<String, String>();
+      map.putAll(additionalOptions);
       map.put(CQL_VERSION_OPTION, CQL_VERSION);
       if (compression != ProtocolOptions.Compression.NONE)
         map.put(COMPRESSION_OPTION, compression.toString());
