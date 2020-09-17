@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2020 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core.policies;
 
 import com.datastax.driver.core.Cluster;
@@ -179,7 +185,9 @@ public class TokenAwarePolicy implements ChainableLoadBalancingPolicy {
     if (partitionKey == null || keyspace == null)
       return childPolicy.newQueryPlan(keyspace, statement);
 
-    final Set<Host> replicas = clusterMetadata.getReplicas(Metadata.quote(keyspace), partitionKey);
+    final Set<Host> replicas =
+        clusterMetadata.getReplicas(
+            Metadata.quote(keyspace), statement.getPartitioner(), partitionKey);
     if (replicas.isEmpty()) return childPolicy.newQueryPlan(loggedKeyspace, statement);
 
     if (replicaOrdering == ReplicaOrdering.NEUTRAL) {

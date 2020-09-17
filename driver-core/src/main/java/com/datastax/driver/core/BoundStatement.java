@@ -109,6 +109,11 @@ public class BoundStatement extends Statement
     return statement.isLWT();
   }
 
+  @Override
+  public Token.Factory getPartitioner() {
+    return statement.getPartitioner();
+  }
+
   /**
    * Returns the prepared statement on which this BoundStatement is based.
    *

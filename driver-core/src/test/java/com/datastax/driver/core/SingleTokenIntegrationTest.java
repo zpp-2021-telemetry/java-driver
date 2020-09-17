@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2020 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import static com.datastax.driver.core.Assertions.assertThat;
@@ -48,7 +54,7 @@ public class SingleTokenIntegrationTest extends CCMTestsSupport {
     assertThat(hostsForRange).containsOnly(host1);
 
     ByteBuffer randomPartitionKey = Bytes.fromHexString("0xCAFEBABE");
-    Set<Host> hostsForKey = metadata.getReplicas(keyspace, randomPartitionKey);
+    Set<Host> hostsForKey = metadata.getReplicas(keyspace, null, randomPartitionKey);
     assertThat(hostsForKey).containsOnly(host1);
 
     Set<TokenRange> rangesForHost = metadata.getTokenRanges(keyspace, host1);
