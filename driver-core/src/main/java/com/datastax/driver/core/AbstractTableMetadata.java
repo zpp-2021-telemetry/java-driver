@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2020 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import com.google.common.base.Predicate;
@@ -308,6 +314,13 @@ public abstract class AbstractTableMetadata {
       and(sb, formatted)
           .append("memtable_flush_period_in_ms = ")
           .append(options.getMemtableFlushPeriodInMs());
+    }
+    for (Map.Entry<String, Map<String, String>> mapExtension :
+        options.getMapExtensions().entrySet()) {
+      and(sb, formatted)
+          .append(mapExtension.getKey())
+          .append(" = ")
+          .append(formatOptionMap(mapExtension.getValue()));
     }
     sb.append(';');
     return sb;
