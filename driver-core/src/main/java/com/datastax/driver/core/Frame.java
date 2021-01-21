@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2021 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.core;
 
 import com.datastax.driver.core.exceptions.DriverInternalError;
@@ -341,8 +347,12 @@ class Frame {
     @Override
     protected void encode(ChannelHandlerContext ctx, Frame frame, List<Object> out)
         throws Exception {
-      // Never compress STARTUP messages
-      if (frame.header.opcode == Message.Request.Type.STARTUP.opcode) {
+      // Never compress STARTUP and OPTIONS messages, because
+      // they could be sent before the server turned on support
+      // for compression (compression type is sent in a STARTUP message
+      // and we are sending OPTIONS message before a STARTUP message).
+      if (frame.header.opcode == Message.Request.Type.STARTUP.opcode
+          || frame.header.opcode == Message.Request.Type.OPTIONS.opcode) {
         out.add(frame);
       } else {
         frame.header.flags.add(Header.Flag.COMPRESSED);
