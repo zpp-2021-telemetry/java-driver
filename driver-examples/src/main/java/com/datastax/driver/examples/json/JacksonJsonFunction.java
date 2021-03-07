@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2021 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.examples.json;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
@@ -47,8 +53,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *
  * <pre>{@code
  * <dependency>
- *     <groupId>com.datastax.cassandra</groupId>
- *     <artifactId>cassandra-driver-extras</artifactId>
+ *     <groupId>com.scylladb</groupId>
+ *     <artifactId>scylla-driver-extras</artifactId>
  *     <version>${driver.version}</version>
  * </dependency>
  *

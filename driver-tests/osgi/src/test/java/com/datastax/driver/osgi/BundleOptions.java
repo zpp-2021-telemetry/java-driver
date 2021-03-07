@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copyright (C) 2021 ScyllaDB
+ *
+ * Modified by ScyllaDB
+ */
 package com.datastax.driver.osgi;
 
 import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackage;
@@ -60,7 +66,7 @@ public class BundleOptions {
     return bundle(
         "reference:file:"
             + PathUtils.getBaseDir()
-            + "/../../driver-core/target/cassandra-driver-core-"
+            + "/../../driver-core/target/scylla-driver-core-"
             + Cluster.getDriverVersion()
             + classifier
             + ".jar");
@@ -70,7 +76,7 @@ public class BundleOptions {
     return bundle(
         "reference:file:"
             + PathUtils.getBaseDir()
-            + "/../../driver-mapping/target/cassandra-driver-mapping-"
+            + "/../../driver-mapping/target/scylla-driver-mapping-"
             + Cluster.getDriverVersion()
             + ".jar");
   }
@@ -79,7 +85,7 @@ public class BundleOptions {
     return bundle(
         "reference:file:"
             + PathUtils.getBaseDir()
-            + "/../../driver-extras/target/cassandra-driver-extras-"
+            + "/../../driver-extras/target/scylla-driver-extras-"
             + Cluster.getDriverVersion()
             + ".jar");
   }
