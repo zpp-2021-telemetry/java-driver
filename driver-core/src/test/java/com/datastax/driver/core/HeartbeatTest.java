@@ -71,7 +71,7 @@ public class HeartbeatTest extends ScassandraTestBase {
   public void should_send_heartbeat_when_connection_is_inactive() throws InterruptedException {
     Cluster cluster =
         Cluster.builder()
-            .addContactPoints(hostAddress.getAddress())
+            .addContactPoint(hostEndPoint)
             .withPort(scassandra.getBinaryPort())
             .withPoolingOptions(new PoolingOptions().setHeartbeatIntervalSeconds(3))
             .build();
@@ -162,7 +162,7 @@ public class HeartbeatTest extends ScassandraTestBase {
       throws Exception {
     Cluster cluster =
         Cluster.builder()
-            .addContactPoints(hostAddress.getAddress())
+            .addContactPoint(hostEndPoint)
             .withPort(scassandra.getBinaryPort())
             .withPoolingOptions(
                 new PoolingOptions()
@@ -270,7 +270,7 @@ public class HeartbeatTest extends ScassandraTestBase {
   public void should_not_send_heartbeat_when_disabled() throws InterruptedException {
     Cluster cluster =
         Cluster.builder()
-            .addContactPoints(hostAddress.getAddress())
+            .addContactPoint(hostEndPoint)
             .withPort(scassandra.getBinaryPort())
             .withPoolingOptions(new PoolingOptions().setHeartbeatIntervalSeconds(0))
             .build();
