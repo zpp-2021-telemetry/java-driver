@@ -314,7 +314,6 @@ simply navigate to each sub-directory.
    address_resolution/*
    async/*
    auth/*
-   cloud/*
    compression/*
    control_connection/*
    custom_codecs/*
