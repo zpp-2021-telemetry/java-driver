@@ -40,6 +40,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import io.opentelemetry.context.Context;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -148,6 +149,7 @@ class SessionManager extends AbstractSession {
       execute(future, statement);
       return future;
     } else {
+      final Context context = Context.current();
       // If the session is not initialized, we can't call makeRequestMessage() synchronously,
       // because it
       // requires internal Cluster state that might not be initialized yet (like the protocol
@@ -165,7 +167,7 @@ class SessionManager extends AbstractSession {
                           SessionManager.this,
                           cluster.manager.protocolVersion(),
                           makeRequestMessage(statement, null));
-                  execute(actualFuture, statement);
+                  execute(actualFuture, statement, context);
                   chainedFuture.setSource(actualFuture);
                 }
               },
@@ -706,23 +708,29 @@ class SessionManager extends AbstractSession {
    * <p>This method will find a suitable node to connect to using the {@link LoadBalancingPolicy}
    * and handle host failover.
    */
-  void execute(final RequestHandler.Callback callback, final Statement statement) {
+  void execute(
+      final RequestHandler.Callback callback, final Statement statement, final Context context) {
     if (this.isClosed()) {
       callback.onException(
           null, new IllegalStateException("Could not send request, session is closed"), 0, 0);
       return;
     }
-    if (isInit) new RequestHandler(this, callback, statement).sendRequest();
+    if (isInit) new RequestHandler(this, callback, statement, context).sendRequest();
     else
       this.initAsync()
           .addListener(
               new Runnable() {
                 @Override
                 public void run() {
-                  new RequestHandler(SessionManager.this, callback, statement).sendRequest();
+                  new RequestHandler(SessionManager.this, callback, statement, context)
+                      .sendRequest();
                 }
               },
               executor());
+  }
+
+  void execute(final RequestHandler.Callback callback, final Statement statement) {
+    execute(callback, statement, Context.current());
   }
 
   private ListenableFuture<PreparedStatement> prepare(

@@ -21,6 +21,7 @@ import com.datastax.driver.core.exceptions.QueryExecutionException;
 import com.datastax.driver.core.exceptions.QueryValidationException;
 import com.datastax.driver.core.exceptions.UnsupportedFeatureException;
 import com.google.common.util.concurrent.ListenableFuture;
+import io.opentelemetry.api.trace.Tracer;
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
@@ -40,6 +41,10 @@ import java.util.Map;
  * names in queries.
  */
 public interface Session extends Closeable {
+
+  void setTracer(Tracer tracer);
+
+  Tracer getTracer();
 
   /**
    * The keyspace to which this Session is currently logged in, if any.
