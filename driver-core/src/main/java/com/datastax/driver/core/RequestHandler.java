@@ -307,6 +307,7 @@ class RequestHandler {
               "Unexpected exception while setting final result from " + response, e),
           System.nanoTime() - startTime, /*unused*/
           0);
+      span.recordException(e);
       span.setStatus(StatusCode.ERROR, e.toString());
       span.end();
     }

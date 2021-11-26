@@ -40,6 +40,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -52,6 +53,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
+import io.opentelemetry.extension.noopapi.NoopOpenTelemetry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +78,14 @@ class SessionManager extends AbstractSession {
     this.cluster = cluster;
     this.pools = new ConcurrentHashMap<Host, HostConnectionPool>();
     this.poolsState = new HostConnectionPool.PoolState();
+  }
+
+  public void setTracer(Tracer tracer) {
+    this.tracer = tracer;
+  }
+
+  public Tracer getTracer() {
+    return tracer;
   }
 
   @Override

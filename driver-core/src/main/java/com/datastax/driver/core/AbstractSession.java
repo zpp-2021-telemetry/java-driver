@@ -36,14 +36,6 @@ public abstract class AbstractSession implements Session {
   private static final boolean CHECK_IO_DEADLOCKS =
       SystemProperties.getBoolean("com.datastax.driver.CHECK_IO_DEADLOCKS", true);
 
-  public void setTracer(Tracer tracer) {
-    this.tracer = tracer;
-  }
-
-  public Tracer getTracer() {
-    return tracer;
-  }
-
   /** {@inheritDoc} */
   @Override
   public ResultSet execute(String query) {
