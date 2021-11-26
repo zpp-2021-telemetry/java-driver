@@ -44,6 +44,7 @@
         <module>driver-examples</module>
         <module>driver-tests</module>
         <module>driver-dist</module>
+        <module>driver-opentelemetry</module>
     </modules>
 
     <properties>
@@ -400,36 +401,6 @@
 
     </dependencyManagement>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-extension-noop-api</artifactId>
-            <version>1.7.0-alpha</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-otlp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-sdk</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>io.opentelemetry</groupId>
-          <artifactId>opentelemetry-semconv</artifactId>
-          <version>1.7.0-alpha</version>
-        </dependency>
-        <dependency>
-          <groupId>io.opentelemetry</groupId>
-          <artifactId>opentelemetry-exporter-zipkin</artifactId>
-          <version>1.7.0</version>
-        </dependency>
-    </dependencies>
-
     <build>
 
         <extensions>
@@ -728,26 +699,29 @@
                     <version>2.9</version>
                 </plugin>
 
-<!--                <plugin>-->
-<!--                    <groupId>org.codehaus.mojo</groupId>-->
-<!--                    <artifactId>animal-sniffer-maven-plugin</artifactId>-->
-<!--                    <version>1.15</version>-->
-<!--                    <executions>-->
-<!--                        <execution>-->
-<!--                            <id>check-jdk8</id>-->
-<!--                            <goals>-->
-<!--                                <goal>check</goal>-->
-<!--                            </goals>-->
-<!--                            <configuration>-->
-<!--                                <signature>-->
-<!--                                    <groupId>org.codehaus.mojo.signature</groupId>-->
-<!--                                    <artifactId>java18</artifactId>-->
-<!--                                    <version>1.0</version>-->
-<!--                                </signature>-->
-<!--                            </configuration>-->
-<!--                        </execution>-->
-<!--                    </executions>-->
-<!--                </plugin>-->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>animal-sniffer-maven-plugin</artifactId>
+                    <version>1.15</version>
+                    <executions>
+                        <execution>
+                            <id>check-jdk8</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <signature>
+                                    <groupId>org.codehaus.mojo.signature</groupId>
+                                    <artifactId>java18</artifactId>
+                                    <version>1.0</version>
+                                </signature>
+                                <excludeDependencies>
+                                    <excludeDependency>io.opentelemetry:*</excludeDependency>
+                                </excludeDependencies>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>

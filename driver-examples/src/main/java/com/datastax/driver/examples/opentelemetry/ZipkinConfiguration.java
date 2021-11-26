@@ -21,27 +21,27 @@ class OpenTelemetryConfiguration {
 
   public static OpenTelemetry initialize(SpanExporter spanExporter) {
     Resource serviceNameResource =
-            Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, SERVICE_NAME));
+        Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, SERVICE_NAME));
 
     // Set to process the spans by the spanExporter.
     SdkTracerProvider tracerProvider =
-            SdkTracerProvider.builder()
-                    .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))
-                    .setResource(Resource.getDefault().merge(serviceNameResource))
-                    .build();
+        SdkTracerProvider.builder()
+            .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))
+            .setResource(Resource.getDefault().merge(serviceNameResource))
+            .build();
     OpenTelemetrySdk openTelemetry =
-            OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).buildAndRegisterGlobal();
+        OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).buildAndRegisterGlobal();
 
     // Add a shutdown hook to shut down the SDK.
     Runtime.getRuntime()
-            .addShutdownHook(
-                    new Thread(
-                            new Runnable() {
-                              @Override
-                              public void run() {
-                                tracerProvider.close();
-                              }
-                            }));
+        .addShutdownHook(
+            new Thread(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    tracerProvider.close();
+                  }
+                }));
 
     // Return the configured instance so it can be used for instrumentation.
     return openTelemetry;
@@ -52,7 +52,7 @@ class OpenTelemetryConfiguration {
     String httpUrl = String.format("http://%s:%s", ip, port);
 
     SpanExporter exporter =
-            ZipkinSpanExporter.builder().setEndpoint(httpUrl + endpointPath).build();
+        ZipkinSpanExporter.builder().setEndpoint(httpUrl + endpointPath).build();
 
     return initialize(exporter);
   }

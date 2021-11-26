@@ -21,7 +21,6 @@ import com.datastax.driver.core.exceptions.QueryExecutionException;
 import com.datastax.driver.core.exceptions.QueryValidationException;
 import com.datastax.driver.core.exceptions.UnsupportedFeatureException;
 import com.google.common.util.concurrent.ListenableFuture;
-import io.opentelemetry.api.trace.Tracer;
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
@@ -42,9 +41,24 @@ import java.util.Map;
  */
 public interface Session extends Closeable {
 
-  void setTracer(Tracer tracer);
+  /**
+   * TODO
+   *
+   * <p>This correspond to the name passed to {@link Cluster#connect(String)}, or to the last
+   * keyspace logged into through a "USE" CQL query if one was used.
+   */
+  void setTracingInfoFactory(TracingInfoFactory tracingInfoFactory);
 
-  Tracer getTracer();
+  /**
+   * TODO
+   *
+   * <p>This correspond to the name passed to {@link Cluster#connect(String)}, or to the last
+   * keyspace logged into through a "USE" CQL query if one was used.
+   *
+   * @return the name of the keyspace to which this Session is currently logged in, or {@code null}
+   *     if the session is logged to no keyspace.
+   */
+  TracingInfoFactory getTracingInfoFactory();
 
   /**
    * The keyspace to which this Session is currently logged in, if any.

@@ -40,8 +40,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Context;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,8 +51,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
-import io.opentelemetry.extension.noopapi.NoopOpenTelemetry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,14 +74,6 @@ class SessionManager extends AbstractSession {
     this.cluster = cluster;
     this.pools = new ConcurrentHashMap<Host, HostConnectionPool>();
     this.poolsState = new HostConnectionPool.PoolState();
-  }
-
-  public void setTracer(Tracer tracer) {
-    this.tracer = tracer;
-  }
-
-  public Tracer getTracer() {
-    return tracer;
   }
 
   @Override
@@ -153,6 +141,7 @@ class SessionManager extends AbstractSession {
 
   @Override
   public ResultSetFuture executeAsync(final Statement statement) {
+    TracingInfo tracingInfo = tracingInfoFactory.buildTracingInfo();
     if (isInit) {
       DefaultResultSetFuture future =
           new DefaultResultSetFuture(
@@ -160,7 +149,6 @@ class SessionManager extends AbstractSession {
       execute(future, statement);
       return future;
     } else {
-      final Context context = Context.current();
       // If the session is not initialized, we can't call makeRequestMessage() synchronously,
       // because it
       // requires internal Cluster state that might not be initialized yet (like the protocol
