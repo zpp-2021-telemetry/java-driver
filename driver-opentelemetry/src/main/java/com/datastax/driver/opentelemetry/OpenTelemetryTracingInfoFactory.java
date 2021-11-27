@@ -22,12 +22,12 @@ public class OpenTelemetryTracingInfoFactory implements TracingInfoFactory {
 
   @Override
   public TracingInfo buildTracingInfo(TracingInfo parent) {
-    return new NoopTracingInfoFactory().buildTracingInfo();
-  }
+    if (parent instanceof OpenTelemetryTracingInfo) {
+      OpenTelemetryTracingInfo castedParent = (OpenTelemetryTracingInfo) parent;
+      return new OpenTelemetryTracingInfo(castedParent.getTracer(), castedParent.getContext());
+    }
 
-  // TODO To zadziała?
-  public TracingInfo buildTracingInfo(OpenTelemetryTracingInfo parent) {
-    return new OpenTelemetryTracingInfo(parent.getTracer(), parent.getContext());
+    return new NoopTracingInfoFactory().buildTracingInfo();
   }
 
   public TracingInfo buildTracingInfo(Span parent) {

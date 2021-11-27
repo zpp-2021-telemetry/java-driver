@@ -170,11 +170,7 @@ class RequestHandler {
     this.tracingInfo = tracingInfo;
     this.tracingInfo.setStartTime("request");
     this.tracingInfo.setConsistencyLevel(consistency);
-    //    this.span = manager.getTracer().spanBuilder("request").startSpan();
-    //    this.span.setAttribute("db.scylla.consistency_level", consistency.toString());
-    //    if (statementType != null) this.span.setAttribute("db.scylla.statement_type",
-    // statementType);
-    //    this.openTelemetryContext = openTelemetryContext.with(span);
+    if (statementType != null) this.tracingInfo.setStatementType(statementType);
   }
 
   void sendRequest() {
@@ -295,8 +291,7 @@ class RequestHandler {
 
       callback.onSet(connection, response, info, statement, System.nanoTime() - startTime);
 
-      //      span.setStatus(StatusCode.OK);
-      //      span.end();
+      tracingInfo.setStatus(TracingInfo.StatusCode.OK);
       tracingInfo.tracingFinished();
     } catch (Exception e) {
       callback.onException(
@@ -305,9 +300,9 @@ class RequestHandler {
               "Unexpected exception while setting final result from " + response, e),
           System.nanoTime() - startTime, /*unused*/
           0);
-      //      span.recordException(e);
-      //      span.setStatus(StatusCode.ERROR, e.toString());
-      //      span.end();
+
+      tracingInfo.recordException(e);
+      tracingInfo.setStatus(TracingInfo.StatusCode.ERROR, e.toString());
       tracingInfo.tracingFinished();
     }
   }
@@ -333,8 +328,7 @@ class RequestHandler {
 
     cancelPendingExecutions(execution);
 
-    //    span.setStatus(StatusCode.ERROR, exception.toString());
-    //    span.end();
+    tracingInfo.setStatus(TracingInfo.StatusCode.ERROR, exception.toString());
     tracingInfo.tracingFinished();
 
     try {

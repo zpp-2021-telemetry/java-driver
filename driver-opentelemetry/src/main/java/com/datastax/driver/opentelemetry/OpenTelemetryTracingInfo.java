@@ -35,6 +35,36 @@ public class OpenTelemetryTracingInfo implements TracingInfo {
   }
 
   @Override
+  public void setStatementType(String statementType) {
+    span.setAttribute("db.scylla.statement_type", statementType);
+  }
+
+  io.opentelemetry.api.trace.StatusCode mapStatusCode(StatusCode code) {
+    switch (code) {
+      case OK:
+        return io.opentelemetry.api.trace.StatusCode.OK;
+      case ERROR:
+        return io.opentelemetry.api.trace.StatusCode.ERROR;
+    }
+    return null;
+  }
+
+  @Override
+  public void recordException(Exception exception) {
+    span.recordException(exception);
+  }
+
+  @Override
+  public void setStatus(StatusCode code, String description) {
+    span.setStatus(mapStatusCode(code), description);
+  }
+
+  @Override
+  public void setStatus(StatusCode code) {
+    span.setStatus(mapStatusCode(code));
+  }
+
+  @Override
   public void tracingFinished() {
     // TODO przydałoby się sprawdzać czy nie wywołano przed setStartTime?
     // Może ustawić default span jako noop?

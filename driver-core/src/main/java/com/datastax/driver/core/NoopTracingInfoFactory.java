@@ -10,6 +10,18 @@ public class NoopTracingInfoFactory implements TracingInfoFactory {
     public void setConsistencyLevel(ConsistencyLevel consistency) {}
 
     @Override
+    public void setStatementType(String statementType) {}
+
+    @Override
+    public void recordException(Exception exception) {}
+
+    @Override
+    public void setStatus(StatusCode code, String description) {}
+
+    @Override
+    public void setStatus(StatusCode code) {}
+
+    @Override
     public void tracingFinished() {}
   }
 
