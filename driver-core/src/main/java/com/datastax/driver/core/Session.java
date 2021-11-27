@@ -51,7 +51,7 @@ public interface Session extends Closeable {
   /**
    * The tracingInfo factory class used by this Session.
    *
-   * @return the factory used currently by this Session. A może przenieść linijkę wyżej?
+   * @return the factory used currently by this Session.
    */
   TracingInfoFactory getTracingInfoFactory();
 
