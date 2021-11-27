@@ -1,10 +1,12 @@
-package com.datastax.driver.core;
+package com.datastax.driver.core.tracing;
+
+import com.datastax.driver.core.ConsistencyLevel;
 
 public class NoopTracingInfoFactory implements TracingInfoFactory {
 
   private static class NoopTracingInfo implements TracingInfo {
     @Override
-    public void setStartTime(String name) {}
+    public void setNameAndStartTime(String name) {}
 
     @Override
     public void setConsistencyLevel(ConsistencyLevel consistency) {}

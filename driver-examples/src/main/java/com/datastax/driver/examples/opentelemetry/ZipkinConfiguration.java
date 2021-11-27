@@ -2,7 +2,7 @@ package com.datastax.driver.examples.opentelemetry;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.TracingInfoFactory;
+import com.datastax.driver.core.tracing.TracingInfoFactory;
 import com.datastax.driver.opentelemetry.OpenTelemetryTracingInfoFactory;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
@@ -87,6 +87,12 @@ public class ZipkinConfiguration {
       client.connect();
       client.createSchema();
       client.loadData();
+      System.out.println(
+          "All requests have been completed. Now you can visit Zipkin at "
+              + ZIPKIN_CONTACT_POINT
+              + ":"
+              + ZIPKIN_PORT
+              + " and examine the produced trace.");
     } finally {
       client.close();
     }
