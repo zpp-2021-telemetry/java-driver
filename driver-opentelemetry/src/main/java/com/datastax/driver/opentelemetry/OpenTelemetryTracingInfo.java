@@ -84,7 +84,7 @@ public class OpenTelemetryTracingInfo implements TracingInfo {
   @Override
   public void tracingFinished() {
     assert tracingStarted : makeMustBeInitMsg(getClass().getEnclosingMethod().getName());
-    assert !tracingFinished : "TracingInfo.setStartTime may only be called once.";
+    assert !tracingFinished : "TracingInfo.tracingFinished may only be called once.";
     tracingFinished = true;
     span.end();
   }
