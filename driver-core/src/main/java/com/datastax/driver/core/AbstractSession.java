@@ -32,15 +32,6 @@ public abstract class AbstractSession implements Session {
   private static final boolean CHECK_IO_DEADLOCKS =
       SystemProperties.getBoolean("com.datastax.driver.CHECK_IO_DEADLOCKS", true);
 
-  // TODO Czy na pewno potrzebne?
-  @Override
-  public void setTracingInfoFactory(TracingInfoFactory tracingInfoFactory) {}
-
-  @Override
-  public TracingInfoFactory getTracingInfoFactory() {
-    return null;
-  }
-
   /** {@inheritDoc} */
   @Override
   public ResultSet execute(String query) {

@@ -20,6 +20,7 @@ import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
 import com.datastax.driver.core.exceptions.QueryValidationException;
 import com.datastax.driver.core.exceptions.UnsupportedFeatureException;
+import com.datastax.driver.core.tracing.TracingInfoFactory;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.Closeable;
 import java.util.Collection;
@@ -42,21 +43,14 @@ import java.util.Map;
 public interface Session extends Closeable {
 
   /**
-   * TODO
-   *
-   * <p>This correspond to the name passed to {@link Cluster#connect(String)}, or to the last
-   * keyspace logged into through a "USE" CQL query if one was used.
+   * Sets desired implementation of tracing library for this Session. //TODO: poprawić to? Nie mam pomysłu.
    */
   void setTracingInfoFactory(TracingInfoFactory tracingInfoFactory);
 
   /**
-   * TODO
+   * The tracingInfo factory class used by this Session.
    *
-   * <p>This correspond to the name passed to {@link Cluster#connect(String)}, or to the last
-   * keyspace logged into through a "USE" CQL query if one was used.
-   *
-   * @return the name of the keyspace to which this Session is currently logged in, or {@code null}
-   *     if the session is logged to no keyspace.
+   * @return the factory used currently by this Session (Noop by default) TODO: zostawić ten nawias? A może przenieść linijkę wyżej?
    */
   TracingInfoFactory getTracingInfoFactory();
 

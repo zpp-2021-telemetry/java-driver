@@ -2,7 +2,7 @@ package com.datastax.driver.examples.opentelemetry;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.TracingInfoFactory;
+import com.datastax.driver.core.tracing.TracingInfoFactory;
 import com.datastax.driver.opentelemetry.OpenTelemetryTracingInfoFactory;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;

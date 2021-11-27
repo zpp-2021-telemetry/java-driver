@@ -40,6 +40,7 @@ import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.driver.core.policies.RetryPolicy;
 import com.datastax.driver.core.policies.RetryPolicy.RetryDecision.Type;
 import com.datastax.driver.core.policies.SpeculativeExecutionPolicy.SpeculativeExecutionPlan;
+import com.datastax.driver.core.tracing.TracingInfo;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
@@ -168,7 +169,7 @@ class RequestHandler {
     else if (statement instanceof PreparedStatement) statementType = "prepared";
 
     this.tracingInfo = tracingInfo;
-    this.tracingInfo.setStartTime("request");
+    this.tracingInfo.setNameAndStartTime("request");
     this.tracingInfo.setConsistencyLevel(consistency);
     if (statementType != null) this.tracingInfo.setStatementType(statementType);
   }

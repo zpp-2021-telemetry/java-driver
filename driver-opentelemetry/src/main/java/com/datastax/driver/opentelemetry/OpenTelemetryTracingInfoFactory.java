@@ -1,8 +1,8 @@
 package com.datastax.driver.opentelemetry;
 
-import com.datastax.driver.core.NoopTracingInfoFactory;
-import com.datastax.driver.core.TracingInfo;
-import com.datastax.driver.core.TracingInfoFactory;
+import com.datastax.driver.core.tracing.NoopTracingInfoFactory;
+import com.datastax.driver.core.tracing.TracingInfo;
+import com.datastax.driver.core.tracing.TracingInfoFactory;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
@@ -16,14 +16,14 @@ public class OpenTelemetryTracingInfoFactory implements TracingInfoFactory {
 
   @Override
   public TracingInfo buildTracingInfo() {
-    Context current = Context.current();
+    final Context current = Context.current();
     return new OpenTelemetryTracingInfo(tracer, current);
   }
 
   @Override
   public TracingInfo buildTracingInfo(TracingInfo parent) {
     if (parent instanceof OpenTelemetryTracingInfo) {
-      OpenTelemetryTracingInfo castedParent = (OpenTelemetryTracingInfo) parent;
+      final OpenTelemetryTracingInfo castedParent = (OpenTelemetryTracingInfo) parent;
       return new OpenTelemetryTracingInfo(castedParent.getTracer(), castedParent.getContext());
     }
 
@@ -31,7 +31,7 @@ public class OpenTelemetryTracingInfoFactory implements TracingInfoFactory {
   }
 
   public TracingInfo buildTracingInfo(Span parent) {
-    Context current = Context.current().with(parent);
+    final Context current = Context.current().with(parent);
     return new OpenTelemetryTracingInfo(tracer, current);
   }
 }
