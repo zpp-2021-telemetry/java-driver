@@ -47,9 +47,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.context.Context;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.Iterator;
@@ -98,8 +95,7 @@ class RequestHandler {
   private final AtomicBoolean isDone = new AtomicBoolean();
   private final AtomicInteger executionIndex = new AtomicInteger();
 
-  private final Span span;
-  private final Context openTelemetryContext;
+  private final TracingInfo tracingInfo;
 
   private Iterator<Host> getReplicas(
       String loggedKeyspace, Statement statement, Iterator<Host> fallback) {
@@ -127,10 +123,7 @@ class RequestHandler {
   }
 
   public RequestHandler(
-      SessionManager manager,
-      Callback callback,
-      Statement statement,
-      Context openTelemetryContext) {
+      SessionManager manager, Callback callback, Statement statement, TracingInfo tracingInfo) {
     this.id = Long.toString(System.identityHashCode(this));
     if (logger.isTraceEnabled()) logger.trace("[{}] {}", id, statement);
     this.manager = manager;
@@ -174,10 +167,14 @@ class RequestHandler {
     if (statement instanceof BatchStatement) statementType = "batch";
     else if (statement instanceof PreparedStatement) statementType = "prepared";
 
-    this.span = manager.getTracer().spanBuilder("request").startSpan();
-    this.span.setAttribute("db.scylla.consistency_level", consistency.toString());
-    if (statementType != null) this.span.setAttribute("db.scylla.statement_type", statementType);
-    this.openTelemetryContext = openTelemetryContext.with(span);
+    this.tracingInfo = tracingInfo;
+    this.tracingInfo.setStartTime("request");
+    this.tracingInfo.setConsistencyLevel(consistency);
+    //    this.span = manager.getTracer().spanBuilder("request").startSpan();
+    //    this.span.setAttribute("db.scylla.consistency_level", consistency.toString());
+    //    if (statementType != null) this.span.setAttribute("db.scylla.statement_type",
+    // statementType);
+    //    this.openTelemetryContext = openTelemetryContext.with(span);
   }
 
   void sendRequest() {
@@ -298,8 +295,9 @@ class RequestHandler {
 
       callback.onSet(connection, response, info, statement, System.nanoTime() - startTime);
 
-      span.setStatus(StatusCode.OK);
-      span.end();
+      //      span.setStatus(StatusCode.OK);
+      //      span.end();
+      tracingInfo.tracingFinished();
     } catch (Exception e) {
       callback.onException(
           connection,
@@ -307,9 +305,10 @@ class RequestHandler {
               "Unexpected exception while setting final result from " + response, e),
           System.nanoTime() - startTime, /*unused*/
           0);
-      span.recordException(e);
-      span.setStatus(StatusCode.ERROR, e.toString());
-      span.end();
+      //      span.recordException(e);
+      //      span.setStatus(StatusCode.ERROR, e.toString());
+      //      span.end();
+      tracingInfo.tracingFinished();
     }
   }
 
@@ -334,8 +333,9 @@ class RequestHandler {
 
     cancelPendingExecutions(execution);
 
-    span.setStatus(StatusCode.ERROR, exception.toString());
-    span.end();
+    //    span.setStatus(StatusCode.ERROR, exception.toString());
+    //    span.end();
+    tracingInfo.tracingFinished();
 
     try {
       if (timerContext != null) timerContext.stop();

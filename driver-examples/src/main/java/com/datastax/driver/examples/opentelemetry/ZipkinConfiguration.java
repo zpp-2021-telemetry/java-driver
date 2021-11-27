@@ -2,13 +2,14 @@ package com.datastax.driver.examples.opentelemetry;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.TracingInfoFactory;
+import com.datastax.driver.opentelemetry.OpenTelemetryTracingInfoFactory;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.exporter.zipkin.ZipkinSpanExporter;
-import io.opentelemetry.extension.noopapi.NoopOpenTelemetry;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -24,7 +25,7 @@ class OpenTelemetryConfiguration {
         Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, SERVICE_NAME));
 
     // Set to process the spans by the spanExporter.
-    SdkTracerProvider tracerProvider =
+    final SdkTracerProvider tracerProvider =
         SdkTracerProvider.builder()
             .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))
             .setResource(Resource.getDefault().merge(serviceNameResource))
@@ -55,13 +56,6 @@ class OpenTelemetryConfiguration {
         ZipkinSpanExporter.builder().setEndpoint(httpUrl + endpointPath).build();
 
     return initialize(exporter);
-  }
-
-  public static OpenTelemetry initializeForZipkin() {
-    String ip = "localhost";
-    int port = 9411;
-
-    return initializeForZipkin(ip, port);
   }
 }
 
@@ -102,8 +96,7 @@ public class ZipkinConfiguration {
 
   private Session session;
 
-  private Tracer tracer =
-      NoopOpenTelemetry.getInstance().getTracerProvider().get("com.datastax.driver");
+  private Tracer tracer;
 
   /** Initiates a connection to the cluster. */
   public void connect() {
@@ -116,7 +109,8 @@ public class ZipkinConfiguration {
     OpenTelemetry openTelemetry =
         OpenTelemetryConfiguration.initializeForZipkin(ZIPKIN_CONTACT_POINT, ZIPKIN_PORT);
     tracer = openTelemetry.getTracerProvider().get("this");
-    session.setTracer(tracer);
+    TracingInfoFactory tracingInfoFactory = new OpenTelemetryTracingInfoFactory(tracer);
+    session.setTracingInfoFactory(tracingInfoFactory);
   }
 
   /** Creates the schema (keyspace) and tables for this example. */

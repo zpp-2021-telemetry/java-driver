@@ -51,7 +51,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <cassandra.version>3.11.2</cassandra.version>
-        <java.version>1.8</java.version>
+        <java.version>1.6</java.version>
         <log4j.version>1.2.17</log4j.version>
         <slf4j.version>1.7.25</slf4j.version>
         <slf4j-log4j12.version>1.7.25</slf4j-log4j12.version>
@@ -98,13 +98,6 @@
     <dependencyManagement>
 
         <dependencies>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-bom</artifactId>
-                <version>1.7.0</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
 
             <dependency>
                 <groupId>com.scylladb</groupId>
@@ -135,6 +128,12 @@
             <dependency>
                 <groupId>com.scylladb</groupId>
                 <artifactId>scylla-driver-extras</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.scylladb</groupId>
+                <artifactId>scylla-driver-opentelemetry</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
 
@@ -704,6 +703,23 @@
                     <artifactId>animal-sniffer-maven-plugin</artifactId>
                     <version>1.15</version>
                     <executions>
+                        <execution>
+                            <id>check-jdk6</id>
+                            <phase>process-classes</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <signature>
+                                    <groupId>org.codehaus.mojo.signature</groupId>
+                                    <artifactId>java16</artifactId>
+                                    <version>1.0</version>
+                                </signature>
+                                <annotations>
+                                    <annotation>com.datastax.driver.core.IgnoreJDK6Requirement</annotation>
+                                </annotations>
+                            </configuration>
+                        </execution>
                         <execution>
                             <id>check-jdk8</id>
                             <goals>

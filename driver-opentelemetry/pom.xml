@@ -1,241 +1,119 @@
-        <!--
+<!--
 
-            Copyright DataStax, Inc.
+    Copyright DataStax, Inc.
 
-            Licensed under the Apache License, Version 2.0 (the "License");
-            you may not use this file except in compliance with the License.
-            You may obtain a copy of the License at
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-            http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
-            Unless required by applicable law or agreed to in writing, software
-            distributed under the License is distributed on an "AS IS" BASIS,
-            WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-            See the License for the specific language governing permissions and
-            limitations under the License.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
-        -->
-        <!--
-            Copyright (C) 2021 ScyllaDB
-            Modified by ScyllaDB
-        -->
+-->
+<!--
+    Copyright (C) 2021 ScyllaDB
+    Modified by ScyllaDB
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-<parent>
-    <groupId>com.scylladb</groupId>
-    <artifactId>scylla-driver-parent</artifactId>
-    <version>3.10.2.0-SNAPSHOT</version>
-</parent>
-
-<artifactId>driver-opentelemetry</artifactId>
-<name>Java Driver for Scylla and Apache Cassandra - OpenTelemetry integration</name>
-<description>A extension of Java Driver for Scylla and Apache Cassandra by adding
-    functionality of creating traces and spans in OpenTelemetry format.
-</description>
-
-<dependencies>
-
-    <!-- driver dependencies -->
-
-    <dependency>
+    <parent>
         <groupId>com.scylladb</groupId>
-        <artifactId>scylla-driver-core</artifactId>
-    </dependency>
+        <artifactId>scylla-driver-parent</artifactId>
+        <version>3.10.2.0-SNAPSHOT</version>
+    </parent>
 
-    <dependency>
-        <groupId>com.scylladb</groupId>
-        <artifactId>scylla-driver-extras</artifactId>
-        <optional>true</optional>
-    </dependency>
+    <artifactId>scylla-driver-opentelemetry</artifactId>
+    <name>Java Driver for Scylla and Apache Cassandra - OpenTelemetry integration</name>
+    <description>A extension of Java Driver for Scylla and Apache Cassandra by adding
+        functionality of creating traces and spans in OpenTelemetry format.
+    </description>
 
-    <!-- OpenTelemetry -->
-    <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-extension-noop-api</artifactId>
-        <version>1.7.0-alpha</version>
-    </dependency>
-    <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-api</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-exporter-otlp</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-sdk</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-semconv</artifactId>
-        <version>1.7.0-alpha</version>
-    </dependency>
-    <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-exporter-zipkin</artifactId>
-        <version>1.7.0</version>
-    </dependency>
+    <dependencyManagement>
 
-    <!--Jackson-->
+        <dependencies>
 
-    <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <optional>true</optional>
-    </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-bom</artifactId>
+                <version>1.9.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
-    <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <optional>true</optional>
-    </dependency>
+        </dependencies>
 
-    <!--JSR-353 (Java JSON API)-->
+    </dependencyManagement>
 
-    <dependency>
-        <groupId>javax.json</groupId>
-        <artifactId>javax.json-api</artifactId>
-        <optional>true</optional>
-    </dependency>
+    <dependencies>
 
-    <dependency>
-        <groupId>org.glassfish</groupId>
-        <artifactId>javax.json</artifactId>
-        <optional>true</optional>
-        <scope>runtime</scope>
-    </dependency>
+        <!-- driver dependencies -->
 
-    <!--JAX-RS-->
+        <dependency>
+            <groupId>com.scylladb</groupId>
+            <artifactId>scylla-driver-core</artifactId>
+        </dependency>
 
-    <dependency>
-        <groupId>javax.ws.rs</groupId>
-        <artifactId>javax.ws.rs-api</artifactId>
-        <optional>true</optional>
-    </dependency>
+        <!-- OpenTelemetry -->
 
-    <!--Jersey-->
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+            <version>1.7.0</version>
+        </dependency>
 
-    <dependency>
-        <groupId>org.glassfish.jersey.core</groupId>
-        <artifactId>jersey-server</artifactId>
-        <optional>true</optional>
-    </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-extension-noop-api</artifactId>
+            <version>1.7.0-alpha</version>
+        </dependency>
 
-    <dependency>
-        <groupId>org.glassfish.jersey.media</groupId>
-        <artifactId>jersey-media-json-jackson</artifactId>
-        <optional>true</optional>
-    </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-semconv</artifactId>
+            <version>1.7.0-alpha</version>
+        </dependency>
 
-    <dependency>
-        <groupId>org.glassfish.jersey.containers</groupId>
-        <artifactId>jersey-container-jdk-http</artifactId>
-        <optional>true</optional>
-    </dependency>
+    </dependencies>
 
-    <!--CDI frameworks (HK2)-->
+    <build>
+        <plugins>
 
-    <dependency>
-        <groupId>org.glassfish.hk2</groupId>
-        <artifactId>hk2-api</artifactId>
-        <optional>true</optional>
-    </dependency>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
 
-    <!-- Standard annotations -->
+            <!-- Disable check-jdk6 check for this submodule. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-maven-plugin</artifactId>
+                <version>1.15</version>
+                <executions>
+                    <execution>
+                        <id>check-jdk6</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
-    <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject</artifactId>
-        <optional>true</optional>
-    </dependency>
+        </plugins>
 
-    <dependency>
-        <groupId>javax.annotation</groupId>
-        <artifactId>javax.annotation-api</artifactId>
-        <optional>true</optional>
-    </dependency>
-
-    <!--logging -->
-
-    <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-    </dependency>
-
-</dependencies>
-
-<build>
-
-    <plugins>
-
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>animal-sniffer-maven-plugin</artifactId>
-            <configuration>
-                <skip>true</skip>
-            </configuration>
-        </plugin>
-
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>clirr-maven-plugin</artifactId>
-            <configuration>
-                <skip>true</skip>
-            </configuration>
-        </plugin>
-
-        <plugin>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <configuration>
-                <skip>true</skip>
-            </configuration>
-        </plugin>
-
-        <plugin>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <configuration>
-                <skip>true</skip>
-            </configuration>
-        </plugin>
-
-        <plugin>
-            <artifactId>maven-install-plugin</artifactId>
-            <configuration>
-                <skip>true</skip>
-            </configuration>
-        </plugin>
-
-        <plugin>
-            <artifactId>maven-deploy-plugin</artifactId>
-            <configuration>
-                <skip>true</skip>
-            </configuration>
-        </plugin>
-
-    </plugins>
-
-</build>
-
-<profiles>
-
-    <profile>
-        <id>release</id>
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <configuration>
-                        <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </build>
-    </profile>
-
-</profiles>
+    </build>
 
 </project>

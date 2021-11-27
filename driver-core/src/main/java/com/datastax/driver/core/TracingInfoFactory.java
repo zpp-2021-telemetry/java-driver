@@ -1,5 +1,7 @@
 package com.datastax.driver.core;
 
 public interface TracingInfoFactory {
-    public TracingInfo buildTracingInfo();
+  TracingInfo buildTracingInfo();
+
+  TracingInfo buildTracingInfo(TracingInfo parent);
 }

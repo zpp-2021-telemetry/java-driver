@@ -1,16 +1,10 @@
 package com.datastax.driver.core;
 
-public class TracingInfo {
-    // All the necessary info to build a span:
-    public void setStartTime() {
-        // TODO
-    }
-    public void setConsistencyLevel() {
-        // TODO
-    }
-//    ... TODO
+public interface TracingInfo {
+  // All the necessary info to build a span:
+  void setStartTime(String name);
 
-    public void tracingFinished() {
-        // TODO
-    }
+  void setConsistencyLevel(ConsistencyLevel consistency);
+
+  void tracingFinished();
 }

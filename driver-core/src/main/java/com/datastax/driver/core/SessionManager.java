@@ -56,7 +56,6 @@ import org.slf4j.LoggerFactory;
 
 /** Driver implementation of the Session interface. */
 class SessionManager extends AbstractSession {
-
   private static final Logger logger = LoggerFactory.getLogger(Session.class);
 
   final Cluster cluster;
@@ -69,11 +68,23 @@ class SessionManager extends AbstractSession {
   private volatile boolean isInit;
   private volatile boolean isClosing;
 
+  private TracingInfoFactory tracingInfoFactory = new NoopTracingInfoFactory();
+
   // Package protected, only Cluster should construct that.
   SessionManager(Cluster cluster) {
     this.cluster = cluster;
     this.pools = new ConcurrentHashMap<Host, HostConnectionPool>();
     this.poolsState = new HostConnectionPool.PoolState();
+  }
+
+  @Override
+  public void setTracingInfoFactory(TracingInfoFactory tracingInfoFactory) {
+    this.tracingInfoFactory = tracingInfoFactory;
+  }
+
+  @Override
+  public TracingInfoFactory getTracingInfoFactory() {
+    return tracingInfoFactory;
   }
 
   @Override
@@ -141,7 +152,6 @@ class SessionManager extends AbstractSession {
 
   @Override
   public ResultSetFuture executeAsync(final Statement statement) {
-    TracingInfo tracingInfo = tracingInfoFactory.buildTracingInfo();
     if (isInit) {
       DefaultResultSetFuture future =
           new DefaultResultSetFuture(
@@ -156,6 +166,7 @@ class SessionManager extends AbstractSession {
       // Because of the way the future is built, we need another 'proxy' future that we can return
       // now.
       final ChainedResultSetFuture chainedFuture = new ChainedResultSetFuture();
+      final TracingInfo tracingInfo = tracingInfoFactory.buildTracingInfo();
       this.initAsync()
           .addListener(
               new Runnable() {
@@ -166,7 +177,7 @@ class SessionManager extends AbstractSession {
                           SessionManager.this,
                           cluster.manager.protocolVersion(),
                           makeRequestMessage(statement, null));
-                  execute(actualFuture, statement, context);
+                  execute(actualFuture, statement, tracingInfo);
                   chainedFuture.setSource(actualFuture);
                 }
               },
@@ -708,20 +719,22 @@ class SessionManager extends AbstractSession {
    * and handle host failover.
    */
   void execute(
-      final RequestHandler.Callback callback, final Statement statement, final Context context) {
+      final RequestHandler.Callback callback,
+      final Statement statement,
+      final TracingInfo tracingInfo) {
     if (this.isClosed()) {
       callback.onException(
           null, new IllegalStateException("Could not send request, session is closed"), 0, 0);
       return;
     }
-    if (isInit) new RequestHandler(this, callback, statement, context).sendRequest();
+    if (isInit) new RequestHandler(this, callback, statement, tracingInfo).sendRequest();
     else
       this.initAsync()
           .addListener(
               new Runnable() {
                 @Override
                 public void run() {
-                  new RequestHandler(SessionManager.this, callback, statement, context)
+                  new RequestHandler(SessionManager.this, callback, statement, tracingInfo)
                       .sendRequest();
                 }
               },
@@ -729,7 +742,8 @@ class SessionManager extends AbstractSession {
   }
 
   void execute(final RequestHandler.Callback callback, final Statement statement) {
-    execute(callback, statement, Context.current());
+    final TracingInfo tracingInfo = tracingInfoFactory.buildTracingInfo();
+    execute(callback, statement, tracingInfo);
   }
 
   private ListenableFuture<PreparedStatement> prepare(
