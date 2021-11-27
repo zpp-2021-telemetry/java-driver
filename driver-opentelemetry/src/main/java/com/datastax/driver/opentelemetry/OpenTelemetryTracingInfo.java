@@ -6,14 +6,18 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 
+import static com.datastax.driver.opentelemetry.PrecisionLevel.FULL;
+
 public class OpenTelemetryTracingInfo implements TracingInfo {
   private Span span;
   private final Tracer tracer;
   private final Context context;
+  private final PrecisionLevel precision;
 
-  public OpenTelemetryTracingInfo(Tracer tracer, Context context) {
+  public OpenTelemetryTracingInfo(Tracer tracer, Context context, PrecisionLevel precision) {
     this.tracer = tracer;
     this.context = context;
+    this.precision = precision;
   }
 
   public Tracer getTracer() {
@@ -24,6 +28,10 @@ public class OpenTelemetryTracingInfo implements TracingInfo {
     return context.with(span);
   }
 
+  public PrecisionLevel getPrecision() {
+    return precision;
+  }
+
   @Override
   public void setStartTime(String name) {
     span = tracer.spanBuilder(name).setParent(context).startSpan();
@@ -32,6 +40,18 @@ public class OpenTelemetryTracingInfo implements TracingInfo {
   @Override
   public void setConsistencyLevel(ConsistencyLevel consistency) {
     span.setAttribute("db.scylla.consistency_level", consistency.toString());
+  }
+
+  public void setStatement(String statement) {
+    if (accuratePrecisionLevel(FULL)) {
+      span.setAttribute("db.scylla.statement", statement);
+    }
+  }
+
+  public void setHostname(String hostname) {
+    if (accuratePrecisionLevel(FULL)) {
+      span.setAttribute("net.peer.name", hostname);
+    }
   }
 
   @Override
@@ -69,5 +89,9 @@ public class OpenTelemetryTracingInfo implements TracingInfo {
     // TODO przydałoby się sprawdzać czy nie wywołano przed setStartTime?
     // Może ustawić default span jako noop?
     span.end();
+  }
+
+  private boolean accuratePrecisionLevel(PrecisionLevel lowestAcceptablePrecision) {
+    return lowestAcceptablePrecision.comparePrecisions(precision) <= 0;
   }
 }
