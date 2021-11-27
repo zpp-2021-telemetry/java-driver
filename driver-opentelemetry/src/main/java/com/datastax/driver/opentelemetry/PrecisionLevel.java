@@ -1,5 +1,8 @@
 package com.datastax.driver.opentelemetry;
 
+/**
+ * The precision level of tracing data that is to be collected. May be extended in the future.
+ */
 public enum PrecisionLevel {
     NORMAL(0),
     FULL(1);
