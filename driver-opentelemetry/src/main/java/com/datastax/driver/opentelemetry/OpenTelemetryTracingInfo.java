@@ -15,7 +15,7 @@ public class OpenTelemetryTracingInfo implements TracingInfo {
   private static final String mustBeInitMsg =
       "TracingInfo.setStartTime must be called before TracingInfo.";
 
-  public OpenTelemetryTracingInfo(Tracer tracer, Context context) {
+  OpenTelemetryTracingInfo(Tracer tracer, Context context) {
     this.tracer = tracer;
     this.context = context;
     tracingStarted = false;

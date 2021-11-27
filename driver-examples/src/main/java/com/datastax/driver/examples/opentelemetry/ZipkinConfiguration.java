@@ -87,6 +87,12 @@ public class ZipkinConfiguration {
       client.connect();
       client.createSchema();
       client.loadData();
+      System.out.println(
+          "All requests have been completed. Now you can visit Zipkin at "
+              + ZIPKIN_CONTACT_POINT
+              + ":"
+              + ZIPKIN_PORT
+              + " and examine the produced trace.");
     } finally {
       client.close();
     }

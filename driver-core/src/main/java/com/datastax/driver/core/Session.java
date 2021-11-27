@@ -43,16 +43,15 @@ import java.util.Map;
 public interface Session extends Closeable {
 
   /**
-   * Sets desired implementation of tracing library for this Session. //TODO: poprawić to? Nie mam
-   * pomysłu.
+   * Sets desired factory for tracing information for this Session. By default it is {@link
+   * com.datastax.driver.core.tracing.NoopTracingInfoFactory}
    */
   void setTracingInfoFactory(TracingInfoFactory tracingInfoFactory);
 
   /**
    * The tracingInfo factory class used by this Session.
    *
-   * @return the factory used currently by this Session (Noop by default) TODO: zostawić ten nawias?
-   *     A może przenieść linijkę wyżej?
+   * @return the factory used currently by this Session. A może przenieść linijkę wyżej?
    */
   TracingInfoFactory getTracingInfoFactory();
 
