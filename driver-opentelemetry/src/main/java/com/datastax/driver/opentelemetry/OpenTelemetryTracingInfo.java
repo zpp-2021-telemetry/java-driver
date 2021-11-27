@@ -1,12 +1,12 @@
 package com.datastax.driver.opentelemetry;
 
+import static com.datastax.driver.opentelemetry.PrecisionLevel.FULL;
+
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.TracingInfo;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
-
-import static com.datastax.driver.opentelemetry.PrecisionLevel.FULL;
 
 public class OpenTelemetryTracingInfo implements TracingInfo {
   private Span span;

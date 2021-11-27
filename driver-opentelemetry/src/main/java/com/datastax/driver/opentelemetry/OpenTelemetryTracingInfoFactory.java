@@ -1,13 +1,13 @@
 package com.datastax.driver.opentelemetry;
 
+import static com.datastax.driver.opentelemetry.PrecisionLevel.NORMAL;
+
 import com.datastax.driver.core.NoopTracingInfoFactory;
 import com.datastax.driver.core.TracingInfo;
 import com.datastax.driver.core.TracingInfoFactory;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
-
-import static com.datastax.driver.opentelemetry.PrecisionLevel.NORMAL;
 
 public class OpenTelemetryTracingInfoFactory implements TracingInfoFactory {
   private final Tracer tracer; // OpenTelemetry Tracer object
@@ -33,7 +33,8 @@ public class OpenTelemetryTracingInfoFactory implements TracingInfoFactory {
   public TracingInfo buildTracingInfo(TracingInfo parent) {
     if (parent instanceof OpenTelemetryTracingInfo) {
       OpenTelemetryTracingInfo castedParent = (OpenTelemetryTracingInfo) parent;
-      return new OpenTelemetryTracingInfo(castedParent.getTracer(), castedParent.getContext(), castedParent.getPrecision());
+      return new OpenTelemetryTracingInfo(
+          castedParent.getTracer(), castedParent.getContext(), castedParent.getPrecision());
     }
 
     return new NoopTracingInfoFactory().buildTracingInfo();
