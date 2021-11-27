@@ -65,19 +65,7 @@
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-api</artifactId>
-            <version>1.7.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-extension-noop-api</artifactId>
-            <version>1.7.0-alpha</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-semconv</artifactId>
-            <version>1.7.0-alpha</version>
+            <version>1.9.1</version>
         </dependency>
 
     </dependencies>
@@ -102,6 +90,15 @@
                     <execution>
                         <id>check-jdk6</id>
                         <phase>process-classes</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>check-jdk8</id>
                         <goals>
                             <goal>check</goal>
                         </goals>
