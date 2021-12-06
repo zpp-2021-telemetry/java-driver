@@ -17,6 +17,9 @@
 package com.datastax.driver.core.tracing;
 
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.policies.LoadBalancingPolicy;
+import com.datastax.driver.core.policies.RetryPolicy;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -30,11 +33,20 @@ public class TestTracingInfo implements TracingInfo {
   private String spanName;
   private ConsistencyLevel consistencyLevel;
   private String statement;
-  private String hostname;
   private String statementType;
   private Collection<Exception> exceptions;
   private StatusCode statusCode;
   private String description;
+  private InetAddress peerIP;
+  private RetryPolicy retryPolicy;
+  private LoadBalancingPolicy loadBalancingPolicy;
+  private int batchSize;
+  private int retryCount;
+  private int shardID;
+  private String peerName;
+  private int peerPort;
+  private Boolean queryPaged;
+  private int rowsCount;
 
   public TestTracingInfo(PrecisionLevel precision) {
     this.precision = precision;
@@ -60,21 +72,67 @@ public class TestTracingInfo implements TracingInfo {
     this.consistencyLevel = consistency;
   }
 
-  public void setStatement(String statement) {
-    if (currentPrecisionLevelIsAtLeast(PrecisionLevel.FULL)) {
-      this.statement = statement;
-    }
-  }
-
-  public void setHostname(String hostname) {
-    if (currentPrecisionLevelIsAtLeast(PrecisionLevel.FULL)) {
-      this.hostname = hostname;
-    }
-  }
-
   @Override
   public void setStatementType(String statementType) {
     this.statementType = statementType;
+  }
+
+  @Override
+  public void setRetryPolicy(RetryPolicy retryPolicy) {
+    this.retryPolicy = retryPolicy;
+  }
+
+  @Override
+  public void setLoadBalancingPolicy(LoadBalancingPolicy loadBalancingPolicy) {
+    this.loadBalancingPolicy = loadBalancingPolicy;
+  }
+
+  @Override
+  public void setBatchSize(int batchSize) {
+    this.batchSize = batchSize;
+  }
+
+  @Override
+  public void setRetryCount(int retryCount) {
+    this.retryCount = retryCount;
+  }
+
+  @Override
+  public void setShardID(int shardID) {
+    this.shardID = shardID;
+  }
+
+  @Override
+  public void setPeerName(String peerName) {
+    this.peerName = peerName;
+  }
+
+  @Override
+  public void setPeerIP(InetAddress peerIP) {
+    this.peerIP = peerIP;
+  }
+
+  @Override
+  public void setPeerPort(int peerPort) {
+    this.peerPort = peerPort;
+  }
+
+  @Override
+  public void setQueryPaged(Boolean queryPaged) {
+    this.queryPaged = queryPaged;
+  }
+
+  @Override
+  public void setRowsCount(int rowsCount) {
+    this.rowsCount = rowsCount;
+  }
+
+  @Override
+  public void setStatement(String statement, int limit) {
+    if (currentPrecisionLevelIsAtLeast(PrecisionLevel.FULL)) {
+      if (statement.length() > limit) statement = statement.substring(0, limit);
+      this.statement = statement;
+    }
   }
 
   @Override
@@ -121,16 +179,52 @@ public class TestTracingInfo implements TracingInfo {
     return consistencyLevel;
   }
 
-  public String getStatement() {
-    return statement;
-  }
-
-  public String getHostname() {
-    return hostname;
-  }
-
   public String getStatementType() {
     return statementType;
+  }
+
+  public RetryPolicy getRetryPolicy() {
+    return retryPolicy;
+  }
+
+  public LoadBalancingPolicy getLoadBalancingPolicy() {
+    return loadBalancingPolicy;
+  }
+
+  public int getBatchSize() {
+    return batchSize;
+  }
+
+  public int getRetryCount() {
+    return retryCount;
+  }
+
+  public int getShardID() {
+    return shardID;
+  }
+
+  public String getPeerName() {
+    return peerName;
+  }
+
+  public InetAddress getPeerIP() {
+    return peerIP;
+  }
+
+  public int getPeerPort() {
+    return peerPort;
+  }
+
+  public Boolean getQueryPaged() {
+    return queryPaged;
+  }
+
+  public int getRowsCount() {
+    return rowsCount;
+  }
+
+  public String getStatement() {
+    return statement;
   }
 
   public StatusCode getStatusCode() {

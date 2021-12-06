@@ -74,6 +74,8 @@ class RequestHandler {
   private static final QueryLogger QUERY_LOGGER = QueryLogger.builder().build();
   static final String DISABLE_QUERY_WARNING_LOGS = "com.datastax.driver.DISABLE_QUERY_WARNING_LOGS";
 
+  private static final int STATEMENT_MAX_LENGTH = 1000;
+
   final String id;
 
   private final SessionManager manager;
@@ -164,14 +166,35 @@ class RequestHandler {
     ConsistencyLevel consistency = statement.getConsistencyLevel();
     if (consistency == null) consistency = Statement.DEFAULT.getConsistencyLevel();
 
-    String statementType = "regular";
-    if (statement instanceof BatchStatement) statementType = "batch";
-    else if (statement instanceof PreparedStatement) statementType = "prepared";
+    String statementType = null;
+    String statementText = null;
+    int batchSize = 1;
+    if (statement instanceof BatchStatement) {
+      statementType = "batch";
+      batchSize = ((BatchStatement) statement).size();
+      StringBuilder statementTextBuilder = new StringBuilder(STATEMENT_MAX_LENGTH);
+      for (Statement subStatement : ((BatchStatement) statement).getStatements()) {
+        if (subStatement instanceof BoundStatement)
+          statementTextBuilder.append(((BoundStatement) subStatement).statement.getQueryString());
+        else statementTextBuilder.append(subStatement.toString());
+      }
+      statementText = statementTextBuilder.toString();
+    } else if (statement instanceof BoundStatement) {
+      statementType = "prepared";
+      statementText = ((BoundStatement) statement).statement.getQueryString();
+    } else if (statement instanceof RegularStatement) {
+      statementType = "regular";
+      statementText = ((RegularStatement) statement).toString();
+    }
 
     this.tracingInfo = tracingInfo;
     this.tracingInfo.setNameAndStartTime("request");
     this.tracingInfo.setConsistencyLevel(consistency);
-    this.tracingInfo.setStatementType(statementType);
+    this.tracingInfo.setRetryPolicy(retryPolicy());
+    this.tracingInfo.setBatchSize(batchSize);
+    this.tracingInfo.setLoadBalancingPolicy(manager.loadBalancingPolicy());
+    if (statementType != null) this.tracingInfo.setStatementType(statementType);
+    if (statementText != null) this.tracingInfo.setStatement(statementText, STATEMENT_MAX_LENGTH);
   }
 
   void sendRequest() {
@@ -292,6 +315,14 @@ class RequestHandler {
 
       callback.onSet(connection, response, info, statement, System.nanoTime() - startTime);
 
+      if (response.type == Message.Response.Type.RESULT) {
+        Responses.Result rm = (Responses.Result) response;
+        if (rm.kind == Responses.Result.Kind.ROWS) {
+          Responses.Result.Rows r = (Responses.Result.Rows) rm;
+          tracingInfo.setRowsCount(r.data.size());
+        }
+      }
+      tracingInfo.setQueryPaged(info.getPagingState() != null);
       tracingInfo.setStatus(TracingInfo.StatusCode.OK);
       tracingInfo.tracingFinished();
     } catch (Exception e) {
@@ -343,6 +374,7 @@ class RequestHandler {
   // Triggered when an execution reaches the end of the query plan.
   // This is only a failure if there are no other running executions.
   private void reportNoMoreHosts(SpeculativeExecution execution) {
+    execution.parentTracingInfo.setRetryCount(execution.retryCount());
     execution.parentTracingInfo.tracingFinished();
     runningExecutions.remove(execution);
     if (runningExecutions.isEmpty())
@@ -466,6 +498,9 @@ class RequestHandler {
 
       currentChildTracingInfo = manager.getTracingInfoFactory().buildTracingInfo(parentTracingInfo);
       currentChildTracingInfo.setNameAndStartTime("query");
+      currentChildTracingInfo.setPeerName(host.getEndPoint().resolve().getHostName());
+      currentChildTracingInfo.setPeerIP(host.getEndPoint().resolve().getAddress());
+      currentChildTracingInfo.setPeerPort(host.getEndPoint().resolve().getPort());
 
       if (allowSpeculativeExecutions && nextExecutionScheduled.compareAndSet(false, true))
         scheduleExecution(speculativeExecutionPlan.nextExecution(host));
@@ -685,6 +720,7 @@ class RequestHandler {
                 CancelledSpeculativeExecutionException.INSTANCE,
                 System.nanoTime() - startTime);
           }
+          parentTracingInfo.setRetryCount(retryCount());
           parentTracingInfo.tracingFinished();
           return;
         } else if (!previous.inProgress
@@ -698,6 +734,7 @@ class RequestHandler {
                 CancelledSpeculativeExecutionException.INSTANCE,
                 System.nanoTime() - startTime);
           }
+          parentTracingInfo.setRetryCount(retryCount());
           parentTracingInfo.tracingFinished();
           return;
         }
@@ -714,6 +751,7 @@ class RequestHandler {
     @Override
     public void onSet(
         Connection connection, Message.Response response, long latency, int retryCount) {
+      currentChildTracingInfo.setShardID(connection.shardId());
       currentChildTracingInfo.tracingFinished();
 
       QueryState queryState = queryStateRef.get();
@@ -1024,6 +1062,7 @@ class RequestHandler {
     @Override
     public void onException(
         Connection connection, Exception exception, long latency, int retryCount) {
+      currentChildTracingInfo.setShardID(connection.shardId());
       currentChildTracingInfo.tracingFinished();
 
       QueryState queryState = queryStateRef.get();
@@ -1063,6 +1102,7 @@ class RequestHandler {
 
     @Override
     public boolean onTimeout(Connection connection, long latency, int retryCount) {
+      currentChildTracingInfo.setShardID(connection.shardId());
       currentChildTracingInfo.tracingFinished();
 
       QueryState queryState = queryStateRef.get();
@@ -1106,11 +1146,13 @@ class RequestHandler {
     }
 
     private void setFinalException(Connection connection, Exception exception) {
+      parentTracingInfo.setRetryCount(retryCount());
       parentTracingInfo.tracingFinished();
       RequestHandler.this.setFinalException(this, connection, exception);
     }
 
     private void setFinalResult(Connection connection, Message.Response response) {
+      parentTracingInfo.setRetryCount(retryCount());
       parentTracingInfo.tracingFinished();
       RequestHandler.this.setFinalResult(this, connection, response);
     }

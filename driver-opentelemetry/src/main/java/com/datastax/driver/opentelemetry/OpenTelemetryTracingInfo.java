@@ -17,11 +17,14 @@
 package com.datastax.driver.opentelemetry;
 
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.policies.LoadBalancingPolicy;
+import com.datastax.driver.core.policies.RetryPolicy;
 import com.datastax.driver.core.tracing.PrecisionLevel;
 import com.datastax.driver.core.tracing.TracingInfo;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
+import java.net.InetAddress;
 
 public class OpenTelemetryTracingInfo implements TracingInfo {
   private Span span;
@@ -84,6 +87,77 @@ public class OpenTelemetryTracingInfo implements TracingInfo {
   public void setStatementType(String statementType) {
     assertStarted();
     span.setAttribute("db.scylla.statement_type", statementType);
+  }
+
+  @Override
+  public void setRetryPolicy(RetryPolicy retryPolicy) {
+    assertStarted();
+    span.setAttribute("db.scylla.retry_policy", retryPolicy.getClass().getSimpleName());
+  }
+
+  @Override
+  public void setLoadBalancingPolicy(LoadBalancingPolicy loadBalancingPolicy) {
+    assertStarted();
+    span.setAttribute(
+        "db.scylla.load_balancing_policy", loadBalancingPolicy.getClass().getSimpleName());
+  }
+
+  @Override
+  public void setBatchSize(int batchSize) {
+    assertStarted();
+    span.setAttribute("db.scylla.batch_size", String.valueOf(batchSize));
+  }
+
+  @Override
+  public void setRetryCount(int retryCount) {
+    assertStarted();
+    span.setAttribute("db.scylla.retry_count", String.valueOf(retryCount));
+  }
+
+  @Override
+  public void setShardID(int shardID) {
+    assertStarted();
+    span.setAttribute("db.scylla.shard_id", String.valueOf(shardID));
+  }
+
+  @Override
+  public void setPeerName(String peerName) {
+    assertStarted();
+    span.setAttribute("net.peer.name", peerName);
+  }
+
+  @Override
+  public void setPeerIP(InetAddress peerIP) {
+    assertStarted();
+    span.setAttribute("net.peer.ip", peerIP.getHostAddress());
+  }
+
+  @Override
+  public void setPeerPort(int peerPort) {
+    assertStarted();
+    span.setAttribute("net.peer.port", String.valueOf(peerPort));
+  }
+
+  @Override
+  public void setQueryPaged(Boolean queryPaged) {
+    assertStarted();
+    if (queryPaged) span.setAttribute("db.scylla.query_paged", "true");
+    else span.setAttribute("db.scylla.query_paged", "false");
+  }
+
+  @Override
+  public void setRowsCount(int rowsCount) {
+    assertStarted();
+    span.setAttribute("db.scylla.rows_count", rowsCount);
+  }
+
+  @Override
+  public void setStatement(String statement, int limit) {
+    assertStarted();
+    if (currentPrecisionLevelIsAtLeast(PrecisionLevel.FULL)) {
+      if (statement.length() > limit) statement = statement.substring(0, limit);
+      span.setAttribute("db.scylla.statement", statement);
+    }
   }
 
   private io.opentelemetry.api.trace.StatusCode mapStatusCode(StatusCode code) {

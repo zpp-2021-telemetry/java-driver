@@ -21,7 +21,9 @@
  */
 package com.datastax.driver.examples.opentelemetry;
 
+import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.tracing.TracingInfoFactory;
 import com.datastax.driver.opentelemetry.OpenTelemetryTracingInfoFactory;
@@ -146,26 +148,41 @@ public class ZipkinUsage {
 
   /** Inserts data into the tables. */
   public void loadData() {
-    Span parentSpan = tracer.spanBuilder("create schema").startSpan();
+    Span parentSpan = tracer.spanBuilder("load data").startSpan();
     try (Scope parentScope = parentSpan.makeCurrent()) {
-      {
-        {
-          Span span = tracer.spanBuilder("insert simplex.playlists").startSpan();
-          try (Scope scope = span.makeCurrent()) {
-            session.execute(
+
+      Span prepareSpan = tracer.spanBuilder("prepare").startSpan();
+      PreparedStatement ps;
+      try (Scope prepareScope = prepareSpan.makeCurrent()) {
+        ps =
+            session.prepare(
                 "INSERT INTO simplex.songs (id, title, album, artist, tags) "
                     + "VALUES ("
                     + "756716f7-2e54-4715-9f00-91dcbea6cf50,"
                     + "'La Petite Tonkinoise',"
                     + "'Bye Bye Blackbird',"
-                    + "'Joséphine Baker',"
+                    + "?,"
                     + "{'jazz', '2013'})"
                     + ";");
-          } finally {
-            span.end();
-          }
-        }
+      } finally {
+        prepareSpan.end();
       }
+
+      Span bindSpan = tracer.spanBuilder("bind").startSpan();
+      BoundStatement bound;
+      try (Scope bindScope = bindSpan.makeCurrent()) {
+        bound = ps.bind("'Joséphine Baker'");
+      } finally {
+        bindSpan.end();
+      }
+
+      Span span = tracer.spanBuilder("insert simplex.playlists").startSpan();
+      try (Scope scope = span.makeCurrent()) {
+        session.execute(bound);
+      } finally {
+        span.end();
+      }
+
     } finally {
       parentSpan.end();
     }
