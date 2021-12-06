@@ -17,6 +17,9 @@
 package com.datastax.driver.core.tracing;
 
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.policies.LoadBalancingPolicy;
+import com.datastax.driver.core.policies.RetryPolicy;
+import java.net.InetAddress;
 
 public class NoopTracingInfoFactory implements TracingInfoFactory {
 
@@ -29,6 +32,39 @@ public class NoopTracingInfoFactory implements TracingInfoFactory {
 
     @Override
     public void setStatementType(String statementType) {}
+
+    @Override
+    public void setRetryPolicy(RetryPolicy retryPolicy) {}
+
+    @Override
+    public void setLoadBalancingPolicy(LoadBalancingPolicy loadBalancingPolicy) {};
+
+    @Override
+    public void setBatchSize(int batchSize) {}
+
+    @Override
+    public void setRetryCount(int retryCount) {}
+
+    @Override
+    public void setShardID(int shardID) {}
+
+    @Override
+    public void setPeerName(String peerName) {}
+
+    @Override
+    public void setPeerIP(InetAddress peerIP) {}
+
+    @Override
+    public void setPeerPort(int peerPort) {}
+
+    @Override
+    public void setQueryPaged(Boolean queryPaged) {}
+
+    @Override
+    public void setRowsCount(int rowsCount) {}
+
+    @Override
+    public void setStatement(String statement, int limit) {}
 
     @Override
     public void recordException(Exception exception) {}
