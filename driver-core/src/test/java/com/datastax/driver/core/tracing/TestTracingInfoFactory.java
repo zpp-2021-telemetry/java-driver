@@ -18,10 +18,12 @@ package com.datastax.driver.core.tracing;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 public class TestTracingInfoFactory implements TracingInfoFactory {
   private final PrecisionLevel precision;
-  private Collection<TracingInfo> spans = new ArrayList();
+  private Collection<TracingInfo> spans =
+      Collections.synchronizedList(new ArrayList<TracingInfo>());
 
   public TestTracingInfoFactory() {
     this.precision = PrecisionLevel.NORMAL;

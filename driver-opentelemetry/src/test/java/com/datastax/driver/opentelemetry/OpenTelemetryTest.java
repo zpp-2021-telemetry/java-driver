@@ -36,6 +36,7 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -45,8 +46,10 @@ import org.testng.annotations.Test;
 public class OpenTelemetryTest extends CCMTestsSupport {
   /** Collects and saves spans. */
   private static final class SpansCollector implements SpanProcessor {
-    final Collection<ReadableSpan> startedSpans = new ArrayList<>();
-    final Collection<ReadableSpan> spans = new ArrayList<>();
+    final Collection<ReadableSpan> startedSpans =
+        Collections.synchronizedList(new ArrayList<ReadableSpan>());
+    final Collection<ReadableSpan> spans =
+        Collections.synchronizedList(new ArrayList<ReadableSpan>());
 
     @Override
     public void onStart(Context parentContext, ReadWriteSpan span) {
