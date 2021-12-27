@@ -23,8 +23,10 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.CCMTestsSupport;
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.PagingOptimizingLoadBalancingPolicy;
 import java.util.ArrayList;
@@ -61,7 +63,15 @@ public class BasicTracingTest extends CCMTestsSupport {
 
   @Test(groups = "short")
   public void tagsTest() {
-    session().execute("INSERT INTO t(k, v) VALUES (4, 2)");
+    PreparedStatement prepared = session().prepare("INSERT INTO t(k, v) VALUES (?, ?)");
+
+    Collection<TracingInfo> prepareSpans = testTracingInfoFactory.getSpans();
+    assertNotEquals(prepareSpans.size(), 0);
+    assertTrue(getRoot(prepareSpans) instanceof TestTracingInfo);
+    prepareSpans.clear();
+
+    BoundStatement bound = prepared.bind(1, 7);
+    session().execute(bound);
 
     Collection<TracingInfo> spans = testTracingInfoFactory.getSpans();
     assertNotEquals(spans.size(), 0);
@@ -75,7 +85,7 @@ public class BasicTracingTest extends CCMTestsSupport {
     assertEquals(root.getStatusCode(), TracingInfo.StatusCode.OK);
 
     // these tags should be set for request span
-    assertEquals(root.getStatementType(), "regular");
+    assertEquals(root.getStatementType(), "prepared");
     assertEquals(root.getBatchSize(), new Integer(1));
     assertEquals(root.getConsistencyLevel(), ConsistencyLevel.ONE);
     assertNull(root.getRowsCount()); // no rows are returned in insert
@@ -83,6 +93,10 @@ public class BasicTracingTest extends CCMTestsSupport {
     assertTrue(root.getRetryPolicy() instanceof DefaultRetryPolicy);
     assertFalse(root.getQueryPaged());
     assertNull(root.getStatement()); // because of precision level NORMAL
+    // these are tags specific to bound statement
+    assertEquals(root.getKeyspace(), keyspace);
+    assertEquals(root.getPartitionKey(), "k=1");
+    assertEquals(root.getTable(), "t");
 
     // these tags should not be set for request span
     assertNull(root.getPeerName());
@@ -109,6 +123,10 @@ public class BasicTracingTest extends CCMTestsSupport {
       assertNull(tracingInfo.getPeerName());
       assertNull(tracingInfo.getPeerIP());
       assertNull(tracingInfo.getPeerPort());
+      // these are tags specific to bound statement
+      assertNull(tracingInfo.getKeyspace());
+      assertNull(tracingInfo.getPartitionKey());
+      assertNull(tracingInfo.getTable());
 
       // this tag should be set for speculative execution span
       assertTrue(tracingInfo.getRetryCount() >= 0);
@@ -134,6 +152,10 @@ public class BasicTracingTest extends CCMTestsSupport {
       assertNull(tracingInfo.getQueryPaged());
       assertNull(tracingInfo.getStatement());
       assertNull(tracingInfo.getRetryCount());
+      // these are tags specific to bound statement
+      assertNull(tracingInfo.getKeyspace());
+      assertNull(tracingInfo.getPartitionKey());
+      assertNull(tracingInfo.getTable());
 
       // these tags should be set for query span
       assertNotNull(tracingInfo.getPeerName());
