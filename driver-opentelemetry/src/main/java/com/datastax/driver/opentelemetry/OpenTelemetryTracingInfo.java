@@ -178,6 +178,12 @@ public class OpenTelemetryTracingInfo implements TracingInfo {
     span.setAttribute("db.scylla.table", table);
   }
 
+  @Override
+  public void setOperationType(String operationType) {
+    assertStarted();
+    span.setAttribute("db.operation", operationType);
+  }
+
   private io.opentelemetry.api.trace.StatusCode mapStatusCode(StatusCode code) {
     switch (code) {
       case OK:

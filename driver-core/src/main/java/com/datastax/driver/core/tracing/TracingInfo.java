@@ -156,6 +156,13 @@ public interface TracingInfo {
   void setTable(String table);
 
   /**
+   * Adds provided operation type (e.g. SELECT) to the trace.
+   *
+   * @param operationType the operation type to be set.
+   */
+  void setOperationType(String operationType);
+
+  /**
    * Records in the trace that the provided exception occured.
    *
    * @param exception the exception to be recorded.

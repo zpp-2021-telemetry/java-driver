@@ -50,6 +50,7 @@ public class TestTracingInfo implements TracingInfo {
   private String keyspace;
   private String partitionKey;
   private String table;
+  private String operationType;
 
   public TestTracingInfo(PrecisionLevel precision) {
     this.precision = precision;
@@ -154,6 +155,11 @@ public class TestTracingInfo implements TracingInfo {
   }
 
   @Override
+  public void setOperationType(String operationType) {
+    this.operationType = operationType;
+  }
+
+  @Override
   public void recordException(Exception exception) {
     if (this.exceptions == null) {
       this.exceptions = new ArrayList();
@@ -255,6 +261,10 @@ public class TestTracingInfo implements TracingInfo {
 
   public String getTable() {
     return table;
+  }
+
+  public String getOperationType() {
+    return operationType;
   }
 
   public StatusCode getStatusCode() {
