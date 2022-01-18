@@ -295,11 +295,6 @@ public class AsyncQueryTest extends CCMTestsSupport {
     }
 
     @Override
-    public void setTracingInfoFactory(TracingInfoFactory tracingInfoFactory) {
-      session.setTracingInfoFactory(tracingInfoFactory);
-    }
-
-    @Override
     public TracingInfoFactory getTracingInfoFactory() {
       return session.getTracingInfoFactory();
     }

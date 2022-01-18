@@ -27,6 +27,7 @@ import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.CCMTestsSupport;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.PagingOptimizingLoadBalancingPolicy;
 import java.util.ArrayList;
@@ -35,17 +36,21 @@ import org.testng.annotations.Test;
 
 public class BasicTracingTest extends CCMTestsSupport {
   private static TestTracingInfoFactory testTracingInfoFactory;
+  private Session session;
 
   @Override
   public void onTestContextInitialized() {
-    execute("CREATE TABLE t (k int PRIMARY KEY, v int)");
-    session().execute("USE " + keyspace);
     initializeTestTracing();
+    session.execute("USE " + keyspace);
+    session.execute("CREATE TABLE t (k int PRIMARY KEY, v int)");
+
+    Collection<TracingInfo> spans = testTracingInfoFactory.getSpans();
+    spans.clear();
   }
 
   @Test(groups = "short")
   public void simpleTracingTest() {
-    session().execute("INSERT INTO t(k, v) VALUES (1, 7)");
+    session.execute("INSERT INTO t(k, v) VALUES (1, 7)");
 
     Collection<TracingInfo> spans = testTracingInfoFactory.getSpans();
     assertNotEquals(spans.size(), 0);
@@ -63,7 +68,7 @@ public class BasicTracingTest extends CCMTestsSupport {
 
   @Test(groups = "short")
   public void tagsTest() {
-    PreparedStatement prepared = session().prepare("INSERT INTO t(k, v) VALUES (?, ?)");
+    PreparedStatement prepared = session.prepare("INSERT INTO t(k, v) VALUES (?, ?)");
 
     Collection<TracingInfo> prepareSpans = testTracingInfoFactory.getSpans();
     assertNotEquals(prepareSpans.size(), 0);
@@ -71,7 +76,7 @@ public class BasicTracingTest extends CCMTestsSupport {
     prepareSpans.clear();
 
     BoundStatement bound = prepared.bind(1, 7);
-    session().execute(bound);
+    session.execute(bound);
 
     Collection<TracingInfo> spans = testTracingInfoFactory.getSpans();
     assertNotEquals(spans.size(), 0);
@@ -169,7 +174,8 @@ public class BasicTracingTest extends CCMTestsSupport {
 
   private void initializeTestTracing() {
     testTracingInfoFactory = new TestTracingInfoFactory(PrecisionLevel.NORMAL);
-    session().setTracingInfoFactory(testTracingInfoFactory);
+    cluster().setTracingInfoFactory(testTracingInfoFactory);
+    session = cluster().connect();
   }
 
   private TracingInfo getRoot(Collection<TracingInfo> spans) {

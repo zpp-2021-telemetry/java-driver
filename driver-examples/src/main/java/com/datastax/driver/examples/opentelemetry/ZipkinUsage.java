@@ -85,13 +85,13 @@ public class ZipkinUsage {
 
     System.out.printf("Connected to cluster: %s%n", cluster.getMetadata().getClusterName());
 
-    session = cluster.connect();
-
     OpenTelemetry openTelemetry =
         OpenTelemetryConfiguration.initializeForZipkin(ZIPKIN_CONTACT_POINT, ZIPKIN_PORT);
     tracer = openTelemetry.getTracerProvider().get("this");
     TracingInfoFactory tracingInfoFactory = new OpenTelemetryTracingInfoFactory(tracer);
-    session.setTracingInfoFactory(tracingInfoFactory);
+    cluster.setTracingInfoFactory(tracingInfoFactory);
+
+    session = cluster.connect();
   }
 
   /** Creates the schema (keyspace) and tables for this example. */
