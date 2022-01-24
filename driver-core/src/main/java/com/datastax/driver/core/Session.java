@@ -49,14 +49,6 @@ import java.util.Map;
 public interface Session extends Closeable {
 
   /**
-   * Sets desired factory for tracing information for this Session. By default it is {@link
-   * com.datastax.driver.core.tracing.NoopTracingInfoFactory}
-   *
-   * @param tracingInfoFactory the factory to be set for this Session.
-   */
-  void setTracingInfoFactory(TracingInfoFactory tracingInfoFactory);
-
-  /**
    * The tracingInfo factory class used by this Session.
    *
    * @return the factory used currently by this Session.

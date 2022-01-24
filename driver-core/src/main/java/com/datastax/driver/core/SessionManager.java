@@ -29,7 +29,6 @@ import com.datastax.driver.core.exceptions.UnsupportedProtocolVersionException;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.ReconnectionPolicy;
 import com.datastax.driver.core.policies.SpeculativeExecutionPolicy;
-import com.datastax.driver.core.tracing.NoopTracingInfoFactory;
 import com.datastax.driver.core.tracing.TracingInfo;
 import com.datastax.driver.core.tracing.TracingInfoFactory;
 import com.datastax.driver.core.utils.MoreFutures;
@@ -72,8 +71,6 @@ class SessionManager extends AbstractSession {
   private volatile boolean isInit;
   private volatile boolean isClosing;
 
-  private TracingInfoFactory tracingInfoFactory = new NoopTracingInfoFactory();
-
   // Package protected, only Cluster should construct that.
   SessionManager(Cluster cluster) {
     this.cluster = cluster;
@@ -82,13 +79,8 @@ class SessionManager extends AbstractSession {
   }
 
   @Override
-  public void setTracingInfoFactory(TracingInfoFactory tracingInfoFactory) {
-    this.tracingInfoFactory = tracingInfoFactory;
-  }
-
-  @Override
   public TracingInfoFactory getTracingInfoFactory() {
-    return tracingInfoFactory;
+    return cluster.getTracingInfoFactory();
   }
 
   @Override
@@ -170,7 +162,7 @@ class SessionManager extends AbstractSession {
       // Because of the way the future is built, we need another 'proxy' future that we can return
       // now.
       final ChainedResultSetFuture chainedFuture = new ChainedResultSetFuture();
-      final TracingInfo tracingInfo = tracingInfoFactory.buildTracingInfo();
+      final TracingInfo tracingInfo = getTracingInfoFactory().buildTracingInfo();
       this.initAsync()
           .addListener(
               new Runnable() {
@@ -746,7 +738,7 @@ class SessionManager extends AbstractSession {
   }
 
   void execute(final RequestHandler.Callback callback, final Statement statement) {
-    final TracingInfo tracingInfo = tracingInfoFactory.buildTracingInfo();
+    final TracingInfo tracingInfo = getTracingInfoFactory().buildTracingInfo();
     execute(callback, statement, tracingInfo);
   }
 

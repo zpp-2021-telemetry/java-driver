@@ -19,6 +19,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.datastax.driver.core.CCMTestsSupport;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.core.tracing.NoopTracingInfoFactory;
 import com.datastax.driver.core.tracing.TracingInfoFactory;
 import io.opentelemetry.api.common.Attributes;
@@ -80,6 +81,8 @@ public class OpenTelemetryTest extends CCMTestsSupport {
     }
   }
 
+  private Session session;
+
   /**
    * Prepare OpenTelemetry configuration and run test with it.
    *
@@ -104,19 +107,19 @@ public class OpenTelemetryTest extends CCMTestsSupport {
     final Tracer tracer = openTelemetry.getTracerProvider().get("this");
     final OpenTelemetryTracingInfoFactory tracingInfoFactory =
         new OpenTelemetryTracingInfoFactory(tracer);
-    session().setTracingInfoFactory(tracingInfoFactory);
+    cluster().setTracingInfoFactory(tracingInfoFactory);
+    session = cluster().connect();
+
+    session.execute("USE " + keyspace);
+    session.execute("CREATE TABLE t (k int PRIMARY KEY, v int)");
+    collector.getSpans().clear();
 
     test.accept(tracer, tracingInfoFactory);
 
     tracerProvider.close();
-    session().setTracingInfoFactory(new NoopTracingInfoFactory());
+    cluster().setTracingInfoFactory(new NoopTracingInfoFactory());
 
     return collector.getSpans();
-  }
-
-  @Override
-  public void onTestContextInitialized() {
-    execute("CREATE TABLE t (k int PRIMARY KEY, v int)");
   }
 
   /** Basic test for creating spans. */
@@ -128,8 +131,8 @@ public class OpenTelemetryTest extends CCMTestsSupport {
               Span userSpan = tracer.spanBuilder("user span").startSpan();
               Scope scope = userSpan.makeCurrent();
 
-              session().execute("INSERT INTO t(k, v) VALUES (4, 2)");
-              session().execute("INSERT INTO t(k, v) VALUES (2, 1)");
+              session.execute("INSERT INTO t(k, v) VALUES (4, 2)");
+              session.execute("INSERT INTO t(k, v) VALUES (2, 1)");
 
               scope.close();
               userSpan.end();
