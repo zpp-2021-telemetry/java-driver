@@ -26,6 +26,7 @@ import static com.datastax.driver.core.ProtocolVersion.V4;
 import com.datastax.driver.core.policies.RetryPolicy;
 import com.google.common.collect.ImmutableMap;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,7 +63,15 @@ public class DefaultPreparedStatement implements PreparedStatement {
     this.preparedId = id;
     this.query = query;
     this.queryKeyspace = queryKeyspace;
-    this.incomingPayload = incomingPayload;
+    if (incomingPayload != null && incomingPayload.containsKey("opentelemetry")) {
+      Map<String, ByteBuffer> incomingPayloadCopy =
+          new HashMap<String, ByteBuffer>(incomingPayload);
+      incomingPayloadCopy.remove("opentelemetry");
+      if (incomingPayloadCopy.isEmpty()) this.incomingPayload = null;
+      else this.incomingPayload = ImmutableMap.copyOf(incomingPayloadCopy);
+    } else {
+      this.incomingPayload = incomingPayload;
+    }
     this.cluster = cluster;
     this.isLWT = isLWT;
     this.partitioner = partitioner;
