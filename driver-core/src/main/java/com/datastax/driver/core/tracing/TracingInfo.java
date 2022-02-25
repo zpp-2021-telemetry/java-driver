@@ -156,6 +156,13 @@ public interface TracingInfo {
   void setTable(String table);
 
   /**
+   * Adds provided list of contacted replicas to the trace.
+   *
+   * @param replicas the list of contacted replicas to be set.
+   */
+  void setReplicas(String replicas);
+
+  /**
    * Records in the trace that the provided exception occured.
    *
    * @param exception the exception to be recorded.
