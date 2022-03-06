@@ -45,16 +45,16 @@ import io.opentelemetry.context.Scope;
  * If they exist already, they will be reused; - inserts a row in each table.
  */
 public class ZipkinUsage {
-  private static final String CONTACT_POINT = "127.0.0.1";
-  private static final int PORT = 9042;
+  protected static final String CONTACT_POINT = "127.0.0.1";
+  protected static final int PORT = 9042;
 
-  private static final String ZIPKIN_CONTACT_POINT = "127.0.0.1";
-  private static final int ZIPKIN_PORT = 9411;
+  protected static final String ZIPKIN_CONTACT_POINT = "127.0.0.1";
+  protected static final int ZIPKIN_PORT = 9411;
 
-  private Cluster cluster;
-  private Session session;
+  protected Cluster cluster;
+  protected Session session;
 
-  private Tracer tracer;
+  protected Tracer tracer;
 
   public static void main(String[] args) {
     // Workaround for setting ContextStorage to ThreadLocalContextStorage.
