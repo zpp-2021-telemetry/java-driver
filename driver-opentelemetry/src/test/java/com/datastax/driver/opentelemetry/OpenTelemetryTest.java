@@ -37,8 +37,10 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import org.testng.annotations.Test;
@@ -47,14 +49,22 @@ import org.testng.annotations.Test;
 public class OpenTelemetryTest extends CCMTestsSupport {
   /** Collects and saves spans. */
   private static final class SpansCollector implements SpanProcessor {
-    final Collection<ReadableSpan> startedSpans =
-        Collections.synchronizedList(new ArrayList<ReadableSpan>());
-    final Collection<ReadableSpan> spans =
-        Collections.synchronizedList(new ArrayList<ReadableSpan>());
+    final Lock lock = new ReentrantLock();
+    final Condition allEnded = lock.newCondition();
+
+    final Collection<ReadableSpan> startedSpans = new ArrayList<>();
+    final Collection<ReadableSpan> spans = new ArrayList<>();
+
+    int activeSpans = 0;
 
     @Override
     public void onStart(Context parentContext, ReadWriteSpan span) {
+      lock.lock();
+
       startedSpans.add(span);
+      ++activeSpans;
+
+      lock.unlock();
     }
 
     @Override
@@ -64,7 +74,14 @@ public class OpenTelemetryTest extends CCMTestsSupport {
 
     @Override
     public void onEnd(ReadableSpan span) {
+      lock.lock();
+
       spans.add(span);
+      --activeSpans;
+
+      if (activeSpans == 0) allEnded.signal();
+
+      lock.unlock();
     }
 
     @Override
@@ -73,8 +90,18 @@ public class OpenTelemetryTest extends CCMTestsSupport {
     }
 
     public Collection<ReadableSpan> getSpans() {
-      for (ReadableSpan span : startedSpans) {
-        assertTrue(span.hasEnded());
+      lock.lock();
+
+      try {
+        while (activeSpans > 0) allEnded.await();
+
+        for (ReadableSpan span : startedSpans) {
+          assertTrue(span.hasEnded());
+        }
+      } catch (InterruptedException e) {
+        assert false;
+      } finally {
+        lock.unlock();
       }
 
       return spans;
@@ -102,7 +129,7 @@ public class OpenTelemetryTest extends CCMTestsSupport {
             .setResource(Resource.getDefault().merge(serviceNameResource))
             .build();
     final OpenTelemetrySdk openTelemetry =
-        OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).buildAndRegisterGlobal();
+        OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).build();
 
     final Tracer tracer = openTelemetry.getTracerProvider().get("this");
     final OpenTelemetryTracingInfoFactory tracingInfoFactory =
@@ -111,6 +138,7 @@ public class OpenTelemetryTest extends CCMTestsSupport {
     session = cluster().connect();
 
     session.execute("USE " + keyspace);
+    session.execute("DROP TABLE IF EXISTS t");
     session.execute("CREATE TABLE t (k int PRIMARY KEY, v int)");
     collector.getSpans().clear();
 
@@ -125,47 +153,49 @@ public class OpenTelemetryTest extends CCMTestsSupport {
   /** Basic test for creating spans. */
   @Test(groups = "short")
   public void simpleTracingTest() {
-    final Collection<ReadableSpan> spans =
-        collectSpans(
-            (tracer, tracingInfoFactory) -> {
-              Span userSpan = tracer.spanBuilder("user span").startSpan();
-              Scope scope = userSpan.makeCurrent();
+    for (int i = 0; i < 1500; i++) {
+      final Collection<ReadableSpan> spans =
+          collectSpans(
+              (tracer, tracingInfoFactory) -> {
+                Span userSpan = tracer.spanBuilder("user span").startSpan();
+                Scope scope = userSpan.makeCurrent();
 
-              session.execute("INSERT INTO t(k, v) VALUES (4, 2)");
-              session.execute("INSERT INTO t(k, v) VALUES (2, 1)");
+                session.execute("INSERT INTO t(k, v) VALUES (4, 2)");
+                session.execute("INSERT INTO t(k, v) VALUES (2, 1)");
 
-              scope.close();
-              userSpan.end();
-            });
+                scope.close();
+                userSpan.end();
+              });
 
-    // Retrieve span created directly by tracer.
-    final List<ReadableSpan> userSpans =
-        spans.stream()
-            .filter(span -> !span.getParentSpanContext().isValid())
-            .collect(Collectors.toList());
-    assertEquals(userSpans.size(), 1);
-    final ReadableSpan userSpan = userSpans.get(0);
+      // Retrieve span created directly by tracer.
+      final List<ReadableSpan> userSpans =
+          spans.stream()
+              .filter(span -> !span.getParentSpanContext().isValid())
+              .collect(Collectors.toList());
+      assertEquals(userSpans.size(), 1);
+      final ReadableSpan userSpan = userSpans.get(0);
 
-    for (ReadableSpan span : spans) {
-      assertTrue(span.getSpanContext().isValid());
-      assertTrue(
-          span.getSpanContext().equals(userSpan.getSpanContext())
-              || span.getParentSpanContext().isValid());
+      for (ReadableSpan span : spans) {
+        assertTrue(span.getSpanContext().isValid());
+        assertTrue(
+            span.getSpanContext().equals(userSpan.getSpanContext())
+                || span.getParentSpanContext().isValid());
+      }
+
+      // Retrieve spans representing requests.
+      final Collection<ReadableSpan> rootSpans =
+          spans.stream()
+              .filter(span -> span.getParentSpanContext().equals(userSpan.getSpanContext()))
+              .collect(Collectors.toList());
+      assertEquals(rootSpans.size(), 2);
+
+      rootSpans.stream()
+          .map(ReadableSpan::toSpanData)
+          .forEach(
+              spanData -> {
+                assertEquals(spanData.getName(), "request");
+                assertEquals(spanData.getStatus().getStatusCode(), StatusCode.OK);
+              });
     }
-
-    // Retrieve spans representing requests.
-    final Collection<ReadableSpan> rootSpans =
-        spans.stream()
-            .filter(span -> span.getParentSpanContext().equals(userSpan.getSpanContext()))
-            .collect(Collectors.toList());
-    assertEquals(rootSpans.size(), 2);
-
-    rootSpans.stream()
-        .map(ReadableSpan::toSpanData)
-        .forEach(
-            spanData -> {
-              assertEquals(spanData.getName(), "request");
-              assertEquals(spanData.getStatus().getStatusCode(), StatusCode.OK);
-            });
   }
 }
