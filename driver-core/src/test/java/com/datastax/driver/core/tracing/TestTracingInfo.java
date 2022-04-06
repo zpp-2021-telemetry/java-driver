@@ -52,6 +52,7 @@ public class TestTracingInfo implements TracingInfo {
   private String table;
   private String operationType;
   private String replicas;
+  private Integer cacheReadCount;
 
   public TestTracingInfo(PrecisionLevel precision) {
     this.precision = precision;
@@ -166,6 +167,11 @@ public class TestTracingInfo implements TracingInfo {
   }
 
   @Override
+  public void setCacheReadCount(int cacheReadCount) {
+    this.cacheReadCount = cacheReadCount;
+  }
+
+  @Override
   public void recordException(Exception exception) {
     if (this.exceptions == null) {
       this.exceptions = new ArrayList();
@@ -275,6 +281,10 @@ public class TestTracingInfo implements TracingInfo {
 
   public String getReplicas() {
     return replicas;
+  }
+
+  public Integer getcacheReadCount() {
+    return cacheReadCount;
   }
 
   public StatusCode getStatusCode() {
