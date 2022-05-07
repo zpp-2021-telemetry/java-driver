@@ -170,6 +170,27 @@ public interface TracingInfo {
   void setReplicas(String replicas);
 
   /**
+   * Adds provided cache reads counter to the trace.
+   *
+   * @param cacheReadCount the counter to be set.
+   */
+  void setCacheReadCount(int cacheReadCount);
+
+  /**
+   * Adds provided DMA reads counter to the trace.
+   *
+   * @param dmaReadCount the counter to be set.
+   */
+  void setDmaReadCount(int dmaReadCount);
+
+  /**
+   * Adds provided counter of bytes read in DMA reads to the trace.
+   *
+   * @param dmaBytesRead the counter to be set.
+   */
+  void setDmaBytesRead(int dmaBytesRead);
+
+  /**
    * Records in the trace that the provided exception occured.
    *
    * @param exception the exception to be recorded.
